@@ -1,13 +1,78 @@
 ---
-title: "Step 02: Introduction to Camel CLI"
+title: "Step 02: Your First Route"
 layout: :theme/page
 ---
 
 <div class="content-prose dark:prose-invert">
 
-<p>In this step, you'll create your first Apache Camel route. Instead of writing YAML by hand, you'll ask your AI assistant to generate it using the Camel MCP Server. Then you'll run it with the Camel CLI and visualize it in Kaoto.</p>
+<p>In this step, you'll create your first Apache Camel route. But first, let's understand the two building blocks that everything in Camel is built on: <strong>routes</strong> and <strong>components</strong>.</p>
 
-<h2>Creating your first route</h2>
+<h2>What is a Route?</h2>
+
+<p>A route is the core building block of Apache Camel. It describes the path a message follows: where it comes from, what happens to it, and where it ends up. Every route starts with a single source (the <code>from</code>) and then applies a series of processing steps. Those steps can transform the message, filter it, route it to different destinations, or call external services.</p>
+
+<p>Camel supports multiple DSLs to define routes. Here's the same route structure in three of them:</p>
+
+<div class="roq-content-tabs">
+  <div class="roq-content-tabs-bar">
+    <button class="roq-content-tab active" data-tab="0">YAML</button>
+    <button class="roq-content-tab" data-tab="1">Java</button>
+    <button class="roq-content-tab" data-tab="2">XML</button>
+  </div>
+  <div class="roq-content-pane active" data-tab="0">
+<pre><code class="language-yaml">- route:
+    id: my-route
+    from:
+      uri: timer:hello
+      parameters:
+        period: 5000
+      steps:
+        - setBody:
+            constant: "Hello!"
+        - log:
+            message: "$\{body}"</code></pre>
+  </div>
+  <div class="roq-content-pane" data-tab="1">
+<pre><code class="language-java">from("timer:hello?period=5000")
+    .routeId("my-route")
+    .setBody(constant("Hello!"))
+    .log("$\{body}");</code></pre>
+  </div>
+  <div class="roq-content-pane" data-tab="2">
+<pre><code class="language-xml">&lt;route id="my-route"&gt;
+  &lt;from uri="timer:hello?period=5000"/&gt;
+  &lt;setBody&gt;
+    &lt;constant&gt;Hello!&lt;/constant&gt;
+  &lt;/setBody&gt;
+  &lt;log message="$\{body}"/&gt;
+&lt;/route&gt;</code></pre>
+  </div>
+</div>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>This step and all the following ones use the YAML DSL. Kaoto only supports YAML, so writing routes in this format lets you visualize and edit them in the Kaoto editor.</p>
+</div>
+
+<p>Regardless of the DSL, the structure is the same. The <code>id</code> gives the route a name for logging and management. The <code>from</code> block defines where messages come from. The steps form a pipeline: each one processes the message and passes it to the next. You can transform the message body, set headers, call an external service with <code>to</code>, or apply an Enterprise Integration Pattern like filtering or splitting.</p>
+
+<h2>What is a Component?</h2>
+
+<p>Components are Camel's connectors to the outside world. Each one knows how to talk to a specific technology: a file system, an HTTP API, a message broker, a database, a timer, or an LLM. When you write <code>timer:hello</code> or <code>kafka:myTopic</code> in a route URI, the part before the colon is the component name. The part after is the endpoint name that the component uses to configure itself.</p>
+
+<p>Camel ships with over 400 components. You don't need to memorize them. That's what the Camel MCP Server is for. In Step 01 you already explored the catalog. Now you'll put a component to work.</p>
+
+<h2>Consumers and Producers</h2>
+
+<p>A component can play two roles in a route. When it sits in the <code>from</code> block, it acts as a <strong>consumer</strong>: it receives or generates messages that start the route. A timer fires on a schedule. A file component watches a directory for new files. A Kafka consumer listens for messages on a topic. The consumer is always the entry point of the route.</p>
+
+<p>When a component appears in a <code>to</code> step, it acts as a <strong>producer</strong>: it sends the message somewhere. Writing to a file, calling an HTTP API, publishing to a message broker. The producer is the outbound side.</p>
+
+<p>Some components can do both. Kafka, for example, can consume messages (in <code>from</code>) or produce messages (in <code>to</code>). Others only work one way. The <code>timer</code> component you're about to use is a consumer only. It generates events on a schedule but doesn't receive anything.</p>
+
+<h2>Creating your first Camel Route</h2>
+
+<p>With those concepts in mind, let's build a route that uses the <code>timer</code> component to generate a message every 5 seconds, then logs it. Instead of writing YAML by hand, you'll ask your AI assistant to generate it using the Camel MCP Server.</p>
 
 <p>Navigate to the step directory:</p>
 
@@ -35,11 +100,11 @@ layout: :theme/page
     <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
   </div>
   <div class="roq-terminal-body">
-    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Using the Camel MCP server, create a route.camel.yaml file with a timer that fires every 5 seconds, sets the body to "Hello from Apache Camel!", and logs it.</span></span>
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Using the Camel MCP server, create a route.camel.yaml file with a timer:hello that fires every 5 seconds, sets the body to "Hello from Apache Camel!", and logs it.</span></span>
   </div>
 </div>
 
-<p>The assistant uses the Camel catalog to look up the <code>timer</code> component and generates the route file. Your <code>route.camel.yaml</code> should look like this:</p>
+<p>The assistant uses the Camel catalog to look up the <code>timer</code> component and generates the route file. Notice how the structure matches what you learned above: a <code>from</code> with a component URI, followed by processing steps. Your <code>route.camel.yaml</code> should look like this:</p>
 
 <pre><code class="language-yaml">- route:
     id: hello-camel
@@ -53,9 +118,14 @@ layout: :theme/page
         - log:
             message: "$\{body}"</code></pre>
 
+<div class="markdown-alert markdown-alert-tip">
+  <p class="markdown-alert-title">Tip</p>
+  <p>Try changing the prompt and ask the assistant to generate the same route in Java DSL instead. Compare the result with the YAML version above.</p>
+</div>
+
 <h2>Running the route</h2>
 
-<p>Open a terminal in the step directory and run:</p>
+<p>Open a terminal and run:</p>
 
 <div class="roq-terminal roq-terminal-static">
   <div class="roq-terminal-bar">
@@ -79,13 +149,40 @@ layout: :theme/page
 
 <h2>Visualizing with Kaoto</h2>
 
-<p>Open the <code>route.camel.yaml</code> file in VS Code. If the Kaoto extension is installed, you can click the Kaoto icon to see a visual representation of the route. This visual editor will become increasingly useful as routes grow more complex.</p>
+<p>Open the step directory in VS Code:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Terminal</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">code</span> .</span>
+  </div>
+</div>
+
+<p>Open the <code>route.camel.yaml</code> file. Kaoto renders the visual editor right away. You should see your route as a flow of connected steps:</p>
+
+<img src="step2-kaoto.png" alt="Kaoto visual editor showing the timer, setBody, and log steps of the route" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
 
 <div class="markdown-alert markdown-alert-note">
   <p class="markdown-alert-title">Note</p>
-  <p>Route files must use the <code>.camel.yaml</code> extension for Kaoto to recognize them and enable the visual editor.</p>
+  <p>The Kaoto VS Code plugin automatically detects every file ending with <code>.camel.yaml</code> in the opened folder. When you click on one, it renders the route in the Kaoto visual editor.</p>
 </div>
 
-<p>You can also edit routes visually in Kaoto: add components, configure parameters, and connect steps by drag-and-drop. The YAML file updates automatically.</p>
+<p>You can also run the route directly from VS Code. Click the Kaoto button (the Camel logo) and it starts the route for you. Here's what the full workflow looks like, from opening the file to running it:</p>
+
+<video controls style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0; width: 100%;">
+  <source src="kaoto.mov" type="video/quicktime" />
+  <source src="kaoto.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+<p>This visual editor gets really useful as routes grow more complex. You can edit routes visually too: add components, configure parameters, and connect steps by drag-and-drop. The YAML file updates automatically.</p>
+
+<p>Take a few minutes to play with the editor. Try adding a new step, changing the timer period, or modifying the log message. When you're ready, head to the next step where you'll connect your route to a Large Language Model.</p>
 
 </div>
