@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Roq site
+        uses: quarkiverse/quarkus-roq@v1
+        with:
+          site-directory: docs
+          github-pages: false

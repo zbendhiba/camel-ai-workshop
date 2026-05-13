@@ -1,0 +1,13 @@
+- route:
+    id: first-agent
+    from:
+      uri: timer:ask
+      parameters:
+        repeatCount: 1
+      steps:
+        - setBody:
+            constant: "What are the main Enterprise Integration Patterns used in messaging systems? Answer in 3 bullet points."
+        - to:
+            uri: langchain4j-agent:myAgent
+        - log:
+            message: "Agent response:\n${body}"

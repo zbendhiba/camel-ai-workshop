@@ -1,0 +1,1 @@
+Hi, I'd like to know if your premium plan includes access to the API. Also, what are the rate limits for API calls?

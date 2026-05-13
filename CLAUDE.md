@@ -1,0 +1,85 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+A hands-on workshop teaching how to build AI-powered data pipelines using Apache Camel CLI and Kaoto. The workshop demonstrates how Camel's Enterprise Integration Patterns (Content-Based Router, Splitter, Aggregator, Dynamic Router) combine with LLM capabilities. Two LLM integration approaches are shown side-by-side: the **OpenAI component** (`openai:chat-completion`) for simple/direct calls, and **LangChain4j-agent** (via Forage) for advanced features like memory, tools, and guardrails.
+
+## Running Steps
+
+Each step is a self-contained directory. Steps with LLM integration have two variant subdirectories (`openai/` and `langchain4j/`). No Maven or Java compilation required.
+
+```bash
+# Run any step (step-01 has no variants)
+cd section-1/step-01
+camel run *
+
+# For steps with variants, choose one
+cd section-1/step-02/openai      # simple, direct OpenAI calls
+camel run *
+
+cd section-1/step-02/langchain4j  # Forage-backed agent with memory
+camel run *
+```
+
+## Documentation (Quarkus Roq)
+
+```bash
+cd docs
+./mvnw quarkus:dev    # http://localhost:8080 with hot reload
+./mvnw package        # build static HTML to target/
+```
+
+## Project Structure
+
+- **`section-1/step-01`**: No LLM, single `route.camel.yaml` at step root
+- **`section-1/step-02` through `step-10`**: Each step has `openai/` and `langchain4j/` subdirectories
+  - `openai/`: `route.camel.yaml` + `application.properties` (config via `camel.component.openai.*`)
+  - `langchain4j/`: `route.camel.yaml` + `forage-agent-factory.properties` (config via Forage beans)
+  - Shared `data/` directory at step root when both variants need the same input files
+- **`docs/`**: Quarkus Roq static site (same stack as zbendhiba.github.io)
+- Steps 06, 07, 09 are **LangChain4j-only** (tools, RAG, multi-agent memory not available in the OpenAI component)
+
+## Key Technologies
+
+- **Camel CLI** (JBang): runtime for executing routes
+- **Kaoto**: VS Code extension for visual route editing
+- **OpenAI component** (`openai:chat-completion`): direct LLM calls, config via `camel.component.openai.*`, compatible with Ollama via `baseUrl`
+- **LangChain4j-agent** (`langchain4j-agent:<bean>`): Forage-backed agents with memory, tools, guardrails
+- **Forage**: opinionated bean factory — configures agents, embeddings, vector DBs via properties files
+- **Ollama**: local LLM provider via OpenAI-compatible API (`http://localhost:11434/v1`)
+
+## Documentation Conventions
+
+### Content Structure
+
+- Pages are in `docs/content/` as `<section>/index.md` files with YAML frontmatter
+- Navigation is defined in `docs/data/menu.yml`
+- Layout: `:theme/page` for all workshop pages
+- Code snippets are copied directly into the Markdown (no include mechanism)
+
+### Qute Escaping
+
+Quarkus Roq uses the Qute templating engine, which interprets `${...}` as template expressions. Camel's Simple language uses the same `${...}` syntax (e.g., `${body}`, `${headers.CamelFileName}`). In documentation Markdown files, **all Camel `${...}` expressions inside code blocks must be escaped** as `$\{...}` to prevent Qute from evaluating them. Example: write `$\{body}` not `${body}`.
+
+### Writing Style
+
+Write documentation as natural, flowing prose. Avoid bullet-point-heavy formats. Use descriptive section titles, not "Part 1" / "Part 2". Prefer paragraph form when explaining concepts.
+
+## Forage Configuration Pattern
+
+Agents are configured via `forage-agent-factory.properties`:
+
+```properties
+forage.<beanName>.agent.model.kind=ollama
+forage.<beanName>.agent.model.name=granite4:7b-a1b-h
+forage.<beanName>.agent.base.url=http://localhost:11434
+```
+
+Referenced in routes as `langchain4j-agent:<beanName>`.
+
+## Important Notes
+
+- Each step directory is self-contained — no dependencies between steps
+- Code snippets in docs are copied, not included — update both the step files and the doc page when making changes

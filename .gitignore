@@ -1,0 +1,32 @@
+target/
+*.class
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+!.vscode/extensions.json
+.project
+.classpath
+.settings/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MkDocs
+docs/site/
+docs/target/
+
+# Camel JBang
+.camel-jbang/
+
+# Node
+node_modules/
+
+# Environment
+.env
+*.env.local

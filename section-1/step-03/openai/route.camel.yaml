@@ -1,0 +1,82 @@
+# <classify>
+- route:
+    id: classify-messages
+    from:
+      uri: file:../data
+      parameters:
+        noop: true
+      steps:
+        - log:
+            message: "Processing: ${headers.CamelFileName}"
+        - setVariable:
+            name: originalMessage
+            simple: "${body}"
+        - setHeader:
+            name: CamelOpenAISystemMessage
+            constant: >-
+              You are a message classifier. You MUST reply with exactly one word:
+              COMPLAINT, QUESTION, or PRAISE. Nothing else.
+        - setBody:
+            simple: "Classify this message:\n${variable.originalMessage}"
+        - to:
+            description: Classify via LLM
+            uri: openai:chat-completion
+            parameters:
+              temperature: 0.0
+        - setVariable:
+            name: category
+            simple: "${body.trim()}"
+        - setBody:
+            simple: "${variable.originalMessage}"
+        - log:
+            message: "Category: ${variable.category} — File: ${headers.CamelFileName}"
+        - choice:
+            when:
+              - simple: "${variable.category} == 'COMPLAINT'"
+                steps:
+                  - to:
+                      uri: direct:handle-complaint
+              - simple: "${variable.category} == 'QUESTION'"
+                steps:
+                  - to:
+                      uri: direct:handle-question
+            otherwise:
+              steps:
+                - to:
+                    uri: direct:handle-other
+# </classify>
+
+# <handlers>
+- route:
+    id: handle-complaint
+    from:
+      uri: direct:handle-complaint
+      steps:
+        - log:
+            message: "COMPLAINT detected — escalating: ${body}"
+
+- route:
+    id: handle-question
+    from:
+      uri: direct:handle-question
+      steps:
+        - log:
+            message: "QUESTION detected — generating answer for: ${body}"
+        - setHeader:
+            name: CamelOpenAISystemMessage
+            constant: >-
+              You are a helpful customer support agent. Answer concisely.
+        - to:
+            description: Generate answer
+            uri: openai:chat-completion
+        - log:
+            message: "Generated answer: ${body}"
+
+- route:
+    id: handle-other
+    from:
+      uri: direct:handle-other
+      steps:
+        - log:
+            message: "OTHER/PRAISE — acknowledged: ${body}"
+# </handlers>
