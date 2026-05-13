@@ -1,23 +1,15 @@
-# camel-ai-workshop
+# Camel AI Workshop
 
-A workshop to learn how to build AI-powered data pipelines with Apache Camel, Forage, and Kaoto.
+A hands-on workshop to learn how to build AI-powered data pipelines with Apache Camel, Forage, and Kaoto.
 
-The workshop demonstrates how Camel's Enterprise Integration Patterns (Content-Based Router, Splitter, Aggregator, Dynamic Router...) combine with LLM capabilities to build intelligent data pipelines that go far beyond simple chatbot interactions.
+Unlike traditional AI workshops that focus on chatbot interactions, this workshop demonstrates how Camel's Enterprise Integration Patterns — Content-Based Router, Splitter, Aggregator, Dynamic Router — combine with LLM capabilities to create production-grade AI data pipelines.
 
-## Prerequisites
+Each step is available in two variants: the **OpenAI component** for simple, direct LLM calls, and **LangChain4j-agent** (via Forage) for advanced features like memory, tools, and guardrails.
 
-- [Camel CLI](https://camel.apache.org/manual/camel-jbang.html) (via JBang)
-- [Ollama](https://ollama.ai/) with a model pulled (e.g. `ollama pull granite4:7b-a1b-h`)
-- [VS Code](https://code.visualstudio.com/) with the [Kaoto extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-kaoto)
+## Workshop
 
-## Running a step
+Follow the workshop at [zinebbendhiba.com/camel-ai-workshop](https://zinebbendhiba.com/camel-ai-workshop/).
 
-Each step is a self-contained directory. Navigate to it and run:
+## Contributing
 
-```shell
-camel run *
-```
-
-## Visualizing routes
-
-Open any `.camel.yaml` file in VS Code with the Kaoto extension to see the route visually.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the documentation locally and submit changes.
