@@ -29,9 +29,18 @@ This route uses a `timer` component that fires every 5 seconds, sets the message
 
 Open a terminal in the step directory and run:
 
-```shell
-camel run *
-```
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Run</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+</div>
 
 You should see "Hello from Apache Camel!" printed every 5 seconds. Press `Ctrl+C` to stop.
 

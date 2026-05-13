@@ -1,0 +1,113 @@
+---
+title: "Requirements"
+layout: :theme/page
+---
+
+<div class="content-prose dark:prose-invert">
+
+<p>You will need the following tools installed on your machine to follow this workshop.</p>
+
+<h2>JBang</h2>
+
+<p>JBang lets you run Java scripts and install CLI tools without setting up a full project. It is the foundation for the Camel CLI used throughout this workshop.</p>
+
+<p>Follow the official installation guide for your platform: <a href="https://www.jbang.dev/documentation/jbang/latest/installation.html#installation-methods" target="_blank">JBang Installation Methods</a>.</p>
+
+<p>Once installed, verify that the <code>jbang</code> command is available:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Verify JBang</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">jbang</span> version</span>
+  </div>
+</div>
+
+<h2>Camel CLI</h2>
+
+<p>The Camel CLI provides the <code>camel</code> command used to run routes in every step of this workshop. Install it through JBang:</p>
+
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Install Camel CLI</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">jbang</span> app install camel@apache/camel</span>
+    <span class="line" style="--line-index: 1"><span class="success">&#10003; camel installed</span></span>
+  </div>
+</div>
+
+<p>Verify the installation:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Verify Camel</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">camel</span> version</span>
+  </div>
+</div>
+
+<p>You can find more details about Camel CLI capabilities in the <a href="https://camel.apache.org/manual/camel-jbang.html" target="_blank">official documentation</a>.</p>
+
+<h2>Ollama</h2>
+
+<p>Install Ollama from <a href="https://ollama.ai/" target="_blank">ollama.ai</a> and pull the model used in this workshop:</p>
+
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Pull Model</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">ollama</span> pull granite4:7b-a1b-h</span>
+    <span class="line" style="--line-index: 1"><span class="success">&#10003; model pulled</span></span>
+  </div>
+</div>
+
+<blockquote class="prose-blockquote">
+  <p><strong>Tip:</strong> You can also use one of these alternative models that we tested successfully: <code>gemma4:e4b</code> and <code>ministral-3:8b</code>.</p>
+</blockquote>
+
+<p>Make sure Ollama is running before starting the workshop (<code>ollama serve</code> if it's not started automatically).</p>
+
+<h2>VS Code + Kaoto</h2>
+
+<p>Install <a href="https://code.visualstudio.com/" target="_blank">VS Code</a> and the <a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-kaoto" target="_blank">Kaoto extension</a> from the marketplace. This gives you a visual editor for <code>.camel.yaml</code> route files.</p>
+
+<h2>Alternative: OpenAI</h2>
+
+<p>If you prefer to use OpenAI instead of Ollama, you will need an API key. Set it as an environment variable:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Environment</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">export</span> OPENAI_API_KEY=your-key-here</span>
+  </div>
+</div>
+
+<p>The OpenAI variant of each step uses <code>application.properties</code> where you can configure the model and API key. Ollama is also supported via its OpenAI-compatible API by setting <code>camel.component.openai.baseUrl=http://localhost:11434/v1</code>.</p>
+
+</div>

@@ -161,10 +161,19 @@ The `data/` directory is shared between both variants and contains sample messag
 
 ## Running the step
 
-```shell
-cd section-1/step-03/openai    # or langchain4j
-camel run *
-```
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Run</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">cd</span> section-1/step-03/openai</span>
+    <span class="line" style="--line-index: 1"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+</div>
 
 Watch the logs to see each file being classified and routed. The LLM's classification drives Camel's routing decisions in real time.
 

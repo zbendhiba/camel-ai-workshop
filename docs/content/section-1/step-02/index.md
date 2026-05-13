@@ -86,9 +86,18 @@ The agent has memory enabled (`message-window`), meaning it can maintain context
 
 Navigate to the variant you chose and run:
 
-```shell
-cd section-1/step-02/openai    # or langchain4j
-camel run *
-```
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Run</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">cd</span> section-1/step-02/openai</span>
+    <span class="line" style="--line-index: 1"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+</div>
 
 The `*` wildcard tells Camel CLI to load all files in the directory — routes, properties, and Forage configuration.
