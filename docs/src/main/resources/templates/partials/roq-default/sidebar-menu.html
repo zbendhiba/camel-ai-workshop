@@ -11,7 +11,7 @@
     <h3 class="section-title menu-title" style="margin-top: 1rem;">{item.section}</h3>
     <ul>
     {#else}
-    <li><a href="{site.url(item.path)}" {#if item.target??}target="{item.target}"{/if}><i class="{item.icon}"></i>{item.title}</a> </li>
+    <li><a href="{#if item.path.startsWith('http')}{item.path}{#else}{site.url(item.path)}{/if}" {#if item.target??}target="{item.target}"{/if}><i class="{item.icon}"></i>{item.title}</a> </li>
     {/if}
     {/for}
   </ul>

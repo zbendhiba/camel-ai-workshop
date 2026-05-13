@@ -23,3 +23,8 @@ items:
   - title: "Conclusion"
     path: "/conclusion/"
     icon: "fa-solid fa-flag-checkered"
+  - section: "  "
+  - title: "GitHub"
+    path: "https://github.com/zbendhiba/camel-ai-workshop"
+    icon: "fa-brands fa-github"
+    target: "_blank"
