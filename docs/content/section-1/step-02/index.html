@@ -1,0 +1,107 @@
+---
+title: "Step 02: First LLM Agent"
+layout: :theme/page
+---
+
+<div class="content-prose dark:prose-invert">
+
+<p>Now that you have a working Camel route, it's time to connect it to a Large Language Model. In this step, you will invoke an LLM from a Camel route using two different approaches: the <strong>OpenAI component</strong> for a simple, direct call, or <strong>LangChain4j with Forage</strong> for a richer setup with memory and extensibility.</p>
+
+<h2>Choosing your approach</h2>
+
+<p>The <a href="https://camel.apache.org/components/next/openai-component.html" target="_blank">OpenAI component</a> is the simplest way to call an LLM from Camel. It works with OpenAI directly or any OpenAI-compatible API like Ollama. No additional framework is needed.</p>
+
+<p>The <a href="https://camel.apache.org/components/next/langchain4j-agent-component.html" target="_blank">LangChain4j Agent component</a> is backed by <a href="https://kaotoio.github.io/forage/" target="_blank">Forage</a>, which configures AI beans through a properties file. It adds memory, tool support, and guardrails on top of the basic LLM call. Choose this approach when you need conversational context or plan to add tools later.</p>
+
+<h2>The route</h2>
+
+<div class="roq-content-tabs">
+  <div class="roq-content-tabs-bar">
+    <button class="roq-content-tab active" data-tab="0">OpenAI</button>
+    <button class="roq-content-tab" data-tab="1">LangChain4j</button>
+  </div>
+  <div class="roq-content-pane active" data-tab="0">
+    <p>The route sends a prompt to the LLM and logs the response:</p>
+<pre><code class="language-yaml">- route:
+    id: first-llm
+    from:
+      uri: timer:ask
+      parameters:
+        repeatCount: 1
+      steps:
+        - setBody:
+            constant: >-
+              What are the main Enterprise Integration Patterns used
+              in messaging systems? Answer in 3 bullet points.
+        - to:
+            description: Call the LLM
+            uri: openai:chat-completion
+        - log:
+            message: "LLM response:\n$\{body}"</code></pre>
+
+    <p>Configuration lives in <code>application.properties</code>:</p>
+<pre><code class="language-properties"># OpenAI
+camel.component.openai.model=gpt-4o
+camel.component.openai.apiKey=$\{OPENAI_API_KEY}
+
+# Or use Ollama (OpenAI-compatible API):
+# camel.component.openai.model=granite4:7b-a1b-h
+# camel.component.openai.baseUrl=http://localhost:11434/v1
+# camel.component.openai.apiKey=ollama</code></pre>
+
+    <p>To use Ollama instead of OpenAI, uncomment the Ollama lines and comment out the OpenAI ones. Ollama exposes an OpenAI-compatible API at <code>http://localhost:11434/v1</code>.</p>
+  </div>
+  <div class="roq-content-pane" data-tab="1">
+    <p>The same route, but using the LangChain4j component:</p>
+<pre><code class="language-yaml">- route:
+    id: first-agent
+    from:
+      uri: timer:ask
+      parameters:
+        repeatCount: 1
+      steps:
+        - setBody:
+            constant: "What are the main Enterprise Integration Patterns used in messaging systems? Answer in 3 bullet points."
+        - to:
+            uri: langchain4j-agent:myAgent
+        - log:
+            message: "Agent response:\n$\{body}"</code></pre>
+
+    <p>The <code>langchain4j-agent:myAgent</code> URI references a bean configured by Forage in a properties file:</p>
+<pre><code class="language-properties">forage.myAgent.agent.model.kind=ollama
+forage.myAgent.agent.model.name=granite4:7b-a1b-h
+forage.myAgent.agent.base.url=http://localhost:11434
+forage.myAgent.agent.features=memory
+forage.myAgent.agent.memory.kind=message-window
+forage.myAgent.agent.memory.max.messages=10</code></pre>
+
+    <p>The agent has memory enabled (<code>message-window</code>), meaning it can maintain context across multiple interactions within the same session. This will become important in later steps.</p>
+  </div>
+</div>
+
+<h2>Running the step</h2>
+
+<p>Navigate to the variant you chose and run:</p>
+
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-tabs">
+      <button class="roq-terminal-tab active" data-tab="0">OpenAI</button>
+      <button class="roq-terminal-tab" data-tab="1">LangChain4j</button>
+    </span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body roq-terminal-pane active" data-tab="0">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">cd</span> section-1/step-02/openai</span>
+    <span class="line" style="--line-index: 1"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+  <div class="roq-terminal-body roq-terminal-pane" data-tab="1">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">cd</span> section-1/step-02/langchain4j</span>
+    <span class="line" style="--line-index: 1"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+</div>
+
+</div>

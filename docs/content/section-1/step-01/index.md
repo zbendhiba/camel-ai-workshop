@@ -44,8 +44,14 @@ Open a terminal in the step directory and run:
 
 You should see "Hello from Apache Camel!" printed every 5 seconds. Press `Ctrl+C` to stop.
 
+> [!NOTE]
+> The `*` wildcard tells Camel CLI to load all files in the directory: routes, properties, and configuration files.
+
 ## Visualizing with Kaoto
 
-Open the `route.camel.yaml` file in VS Code. If the Kaoto extension is installed, you can click the Kaoto icon to see a visual representation of the route. This visual editor works for all `.camel.yaml` files and will become increasingly useful as routes grow more complex.
+Open the `route.camel.yaml` file in VS Code. If the Kaoto extension is installed, you can click the Kaoto icon to see a visual representation of the route. This visual editor will become increasingly useful as routes grow more complex.
+
+> [!NOTE]
+> Route files must use the `.camel.yaml` extension for Kaoto to recognize them and enable the visual editor.
 
 You can also edit routes visually in Kaoto: add components, configure parameters, and connect steps by drag-and-drop. The YAML file updates automatically.

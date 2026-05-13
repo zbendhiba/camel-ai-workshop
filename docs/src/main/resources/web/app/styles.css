@@ -1,0 +1,82 @@
+/* Content Tabs */
+
+.roq-content-tabs {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.dark .roq-content-tabs {
+    border-color: #404040;
+    background: #171717;
+}
+
+.roq-content-tabs-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.dark .roq-content-tabs-bar {
+    border-bottom-color: #404040;
+    background: #262626;
+}
+
+.roq-content-tab {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.roq-content-tab:hover {
+    color: #374151;
+}
+
+.dark .roq-content-tab {
+    color: #9ca3af;
+}
+
+.dark .roq-content-tab:hover {
+    color: #d1d5db;
+}
+
+.roq-content-tab.active {
+    color: var(--color-accent-500, #6366f1);
+    border-bottom-color: var(--color-accent-500, #6366f1);
+}
+
+.dark .roq-content-tab.active {
+    color: var(--color-accent-400, #818cf8);
+    border-bottom-color: var(--color-accent-400, #818cf8);
+}
+
+.roq-content-pane {
+    display: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.roq-content-pane.active {
+    display: block;
+}
+
+.roq-content-pane pre {
+    margin: 0.75rem 0;
+    border-radius: 0.5rem;
+}
+
+.roq-content-pane p:first-child {
+    margin-top: 0;
+}
+
+.roq-content-pane p:last-child {
+    margin-bottom: 0;
+}
