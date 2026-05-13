@@ -1,0 +1,177 @@
+---
+title: "Step 01: Meet the Camel MCP Server"
+layout: :theme/page
+---
+
+<div class="content-prose dark:prose-invert">
+
+<p>Before writing your first route, let's get to know the tool you'll use throughout this workshop. The <a href="https://camel.apache.org/manual/camel-jbang-mcp.html" target="_blank">Camel MCP Server</a> gives AI coding assistants direct access to the Apache Camel catalog through the <a href="https://modelcontextprotocol.io/" target="_blank">Model Context Protocol</a>. Connect it to Claude Code, Copilot, or Codex, and the assistant gains knowledge of Camel's 400+ components, Enterprise Integration Patterns, data formats, and more.</p>
+
+<p>Your AI assistant doesn't just know how to write code. It understands Apache Camel.</p>
+
+<h2>What's inside</h2>
+
+<p>The server provides 27 tools organized into five categories:</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+
+  <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; background: #f9fafb;" class="dark:!bg-neutral-800 dark:!border-neutral-700">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <i class="fa-solid fa-book" style="color: var(--color-accent-500, #6366f1); font-size: 1.1rem;"></i>
+      <strong>Catalog</strong>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem;">Browse and search components by category, read full documentation, explore EIPs, data formats, expression languages, Kamelets, and query available versions.</p>
+  </div>
+
+  <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; background: #f9fafb;" class="dark:!bg-neutral-800 dark:!border-neutral-700">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <i class="fa-solid fa-route" style="color: var(--color-accent-500, #6366f1); font-size: 1.1rem;"></i>
+      <strong>Route tools</strong>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem;">Validate YAML routes, explain what a route does, analyze security vulnerabilities, generate JUnit 5 test skeletons, and transform between YAML and XML.</p>
+  </div>
+
+  <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; background: #f9fafb;" class="dark:!bg-neutral-800 dark:!border-neutral-700">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <i class="fa-solid fa-file-code" style="color: var(--color-accent-500, #6366f1); font-size: 1.1rem;"></i>
+      <strong>OpenAPI</strong>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem;">Validate OpenAPI specs for Camel compatibility, generate YAML route scaffolds from a spec, and get guidance for mock mode.</p>
+  </div>
+
+  <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; background: #f9fafb;" class="dark:!bg-neutral-800 dark:!border-neutral-700">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <i class="fa-solid fa-arrow-up-right-dots" style="color: var(--color-accent-500, #6366f1); font-size: 1.1rem;"></i>
+      <strong>Migration</strong>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem;">Analyze a project to detect runtime and version, check component compatibility, search migration guides, and generate OpenRewrite recipes.</p>
+  </div>
+
+  <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; background: #f9fafb;" class="dark:!bg-neutral-800 dark:!border-neutral-700">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <i class="fa-solid fa-stethoscope" style="color: var(--color-accent-500, #6366f1); font-size: 1.1rem;"></i>
+      <strong>Diagnostics</strong>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem;">Detect missing or outdated dependencies, and diagnose errors by analyzing stack traces to identify root causes and suggest fixes.</p>
+  </div>
+
+</div>
+
+<h2>Hands-on: explore the catalog</h2>
+
+<p>Open the AI coding assistant you configured in the Requirements step and try these prompts. Each one triggers a different MCP tool behind the scenes.</p>
+
+<h3>Discover messaging components</h3>
+
+<p>Type the following prompt into your AI assistant:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Prompt</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">List all Camel components related to messaging.</span></span>
+  </div>
+</div>
+
+<p>The assistant calls the <code>camel_catalog_components</code> MCP tool behind the scenes. Here's what it looks like in <a href="https://bob.ibm.com/docs/shell" target="_blank">Bob Shell</a>:</p>
+
+<img src="bob-mcp-messaging.png" alt="Bob calling the camel_catalog_components MCP tool to list messaging components" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
+
+<p>You should see components like <code>kafka</code>, <code>jms</code>, <code>amqp</code>, <code>paho-mqtt5</code>, and others.</p>
+
+<h3>Read component documentation</h3>
+
+<p>Now pick a component and ask for its full documentation:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Prompt</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Show me the documentation for the Camel timer component.</span></span>
+  </div>
+</div>
+
+<p>In <a href="https://bob.ibm.com/docs/shell" target="_blank">Bob Shell</a>, the assistant calls <code>camel_catalog_component_doc</code>:</p>
+
+<img src="bob-mcp-timer-doc.png" alt="Bob Shell calling the camel_catalog_component_doc MCP tool for the timer component" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
+
+<p>You get endpoint parameters, default values, and usage examples. The <code>timer</code> component is the one you'll use in the next step to create your first route.</p>
+
+<h3>Explore Enterprise Integration Patterns</h3>
+
+<p>Ask about the patterns you'll use throughout this workshop:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Prompt</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">What Camel Enterprise Integration Patterns are available for routing?</span></span>
+  </div>
+</div>
+
+<p>In <a href="https://bob.ibm.com/docs/shell" target="_blank">Bob Shell</a>, the assistant calls <code>camel_catalog_eips</code>:</p>
+
+<img src="bob-mcp-eips.png" alt="Bob Shell calling the camel_catalog_eips MCP tool for routing patterns" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
+
+<p>You'll get patterns like Content-Based Router, Dynamic Router, and Recipient List. Several of these show up in later steps when you build intelligent data pipelines.</p>
+
+<h3>Validate a route</h3>
+
+<p>Ask the assistant to validate a route definition. Type the prompt and paste the YAML below:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Prompt</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Use the Camel MCP server to validate this route:</span></span>
+    <span class="line"><span class="cmd"></span></span>
+    <span class="line"><span class="cmd">- route:</span></span>
+    <span class="line"><span class="cmd">    id: hello-camel</span></span>
+    <span class="line"><span class="cmd">    from:</span></span>
+    <span class="line"><span class="cmd">      uri: timer:hello</span></span>
+    <span class="line"><span class="cmd">      parameters:</span></span>
+    <span class="line"><span class="cmd">        period: 5000</span></span>
+    <span class="line"><span class="cmd">      steps:</span></span>
+    <span class="line"><span class="cmd">        - setBody:</span></span>
+    <span class="line"><span class="cmd">            constant: "Hello from Apache Camel!"</span></span>
+    <span class="line"><span class="cmd">        - log:</span></span>
+    <span class="line"><span class="cmd">            message: "$\{body}"</span></span>
+  </div>
+</div>
+
+<p>In <a href="https://bob.ibm.com/docs/shell" target="_blank">Bob Shell</a>, the assistant calls <code>camel_validate_route</code>:</p>
+
+<img src="bob-mcp-validate.png" alt="Bob Shell calling the camel_validate_route MCP tool" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
+
+<p>The assistant validates the route against the Camel YAML DSL schema and checks that the <code>timer</code> component parameters are correct. Try introducing a typo (say, change <code>period</code> to <code>peroid</code>) and the validation will catch it.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>The MCP tools run entirely on your machine. No route data is sent to external services. The Camel MCP Server uses the local Camel catalog bundled with the JBang runner.</p>
+</div>
+
+<h2>What's next</h2>
+
+<p>Now that you've seen what the Camel MCP Server can do, time to create your first route. In the next step, you'll use the <code>timer</code> component you just explored to build a Camel route and visualize it in Kaoto.</p>
+
+</div>

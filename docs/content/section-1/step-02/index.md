@@ -1,5 +1,5 @@
 ---
-title: "Step 01: Introduction to Camel CLI"
+title: "Step 02: Introduction to Camel CLI"
 layout: :theme/page
 ---
 

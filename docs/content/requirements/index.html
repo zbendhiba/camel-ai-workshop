@@ -63,6 +63,38 @@ layout: :theme/page
 
 <p>You can find more details about Camel CLI capabilities in the <a href="https://camel.apache.org/manual/camel-jbang.html" target="_blank">official documentation</a>.</p>
 
+<h2>Forage Plugin</h2>
+
+<p><a href="https://kaotoio.github.io/forage/" target="_blank">Forage</a> is a Camel plugin that automates Java bean instantiation for LangChain4j components. Install it via the Camel CLI:</p>
+
+<div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Install Forage</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line" style="--line-index: 0"><span class="prompt">$</span> <span class="cmd">camel</span> plugin add forage --gav io.kaoto.forage:camel-jbang-plugin-forage:1.1</span>
+  </div>
+</div>
+
+<p>Verify the installation:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Verify Forage</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">camel</span> forage --help</span>
+  </div>
+</div>
+
 <h2>Ollama</h2>
 
 <p>Install Ollama from <a href="https://ollama.ai/" target="_blank">ollama.ai</a> and pull the model used in this workshop:</p>
@@ -91,6 +123,46 @@ layout: :theme/page
 <h2>VS Code + Kaoto</h2>
 
 <p>Install <a href="https://code.visualstudio.com/" target="_blank">VS Code</a> and the <a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-kaoto" target="_blank">Kaoto extension</a> from the marketplace. This gives you a visual editor for <code>.camel.yaml</code> route files.</p>
+
+<h2>Camel MCP Server</h2>
+
+<p>The <a href="https://camel.apache.org/manual/camel-jbang-mcp.html" target="_blank">Camel MCP Server</a> exposes the Apache Camel Catalog and specialized tools through the Model Context Protocol (MCP). It enables AI coding assistants to understand Camel components, validate routes, generate tests, and more.</p>
+
+<p>The server runs via JBang. First, check your installed Camel version to use the matching MCP server:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Check version</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">camel</span> version</span>
+  </div>
+</div>
+
+<p>Then configure it with your AI coding assistant. Add this to your MCP configuration file (e.g., <code>.mcp.json</code> for Claude Code), replacing the version with the one from <code>camel version</code>:</p>
+
+<pre><code class="language-json">{
+  "mcpServers": {
+    "camel": {
+      "command": "jbang",
+      "args": [
+        "-Dquarkus.log.level=WARN",
+        "org.apache.camel:camel-jbang-mcp:VERSION:runner"
+      ]
+    }
+  }
+}</code></pre>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>If you are using Claude Code or Bob, this project already includes a pre-configured MCP file (<code>.mcp.json</code> for Claude Code, <code>.bob/mcp.json</code> for Bob). No additional setup is needed.</p>
+</div>
+
+<p>See the <a href="https://camel.apache.org/manual/camel-jbang-mcp.html#_setup" target="_blank">setup guide</a> for configuration with other tools (VS Code Copilot, JetBrains, Codex).</p>
 
 <h2>Alternative: OpenAI</h2>
 
