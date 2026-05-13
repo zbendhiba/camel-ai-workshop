@@ -24,6 +24,9 @@ docs/target/
 # Camel JBang
 .camel-jbang/
 
+# Bob Shell working files
+**/.bob/notes/
+
 # Node
 node_modules/
 
