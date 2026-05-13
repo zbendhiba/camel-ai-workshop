@@ -177,4 +177,5 @@ The `data/` directory is shared between both variants and contains sample messag
 
 Watch the logs to see each file being classified and routed. The LLM's classification drives Camel's routing decisions in real time.
 
-**Important:** Temperature is set to `0.0` for deterministic classification. A higher temperature would introduce randomness that could cause unpredictable routing.
+> [!IMPORTANT]
+> Temperature is set to `0.0` for deterministic classification. A higher temperature would introduce randomness that could cause unpredictable routing.

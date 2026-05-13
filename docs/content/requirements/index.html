@@ -81,9 +81,10 @@ layout: :theme/page
   </div>
 </div>
 
-<blockquote class="prose-blockquote">
-  <p><strong>Tip:</strong> You can also use one of these alternative models that we tested successfully: <code>gemma4:e4b</code> and <code>ministral-3:8b</code>.</p>
-</blockquote>
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>You can also use one of these alternative models that we tested successfully: <code>gemma4:e4b</code> and <code>ministral-3:8b</code>.</p>
+</div>
 
 <p>Make sure Ollama is running before starting the workshop (<code>ollama serve</code> if it's not started automatically).</p>
 
@@ -108,6 +109,11 @@ layout: :theme/page
   </div>
 </div>
 
-<p>The OpenAI variant of each step uses <code>application.properties</code> where you can configure the model and API key. Ollama is also supported via its OpenAI-compatible API by setting <code>camel.component.openai.baseUrl=http://localhost:11434/v1</code>.</p>
+<p>The OpenAI variant of each step uses <code>application.properties</code> where you can configure the model and API key.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>Ollama is also supported via its OpenAI-compatible API by setting <code>camel.component.openai.baseUrl=http://localhost:11434/v1</code>.</p>
+</div>
 
 </div>
