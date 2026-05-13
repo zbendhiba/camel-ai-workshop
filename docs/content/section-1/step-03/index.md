@@ -1,11 +1,11 @@
 ---
-title: "Step 03 — Content-Based Router with LLM"
+title: "Step 03: Content-Based Router with LLM"
 layout: :theme/page
 ---
 
 This step demonstrates one of the most powerful combinations in this workshop: using an LLM to make routing decisions within a Camel Content-Based Router. Instead of routing based on simple header values or message format, the LLM classifies the message semantically, and Camel routes it accordingly.
 
-This is something a standalone LLM framework cannot do natively — Camel's EIP-driven orchestration adds a dimension that goes beyond simple prompt-response interactions.
+This is something a standalone LLM framework cannot do natively. Camel's EIP-driven orchestration adds a dimension that goes beyond simple prompt-response interactions.
 
 ## The scenario
 
@@ -118,7 +118,7 @@ The classification prompt is embedded directly in the body. Forage handles the m
 
 ## The handler routes
 
-Each category has its own handler. The question handler is particularly interesting — it sends the original message back to the LLM to generate a helpful response. Here is the OpenAI version:
+Each category has its own handler. The question handler sends the original message back to the LLM to generate a response. Here is the OpenAI version:
 
 ```yaml
 - route:

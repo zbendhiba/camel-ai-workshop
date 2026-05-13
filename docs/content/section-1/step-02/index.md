@@ -1,5 +1,5 @@
 ---
-title: "Step 02 — First LLM Agent"
+title: "Step 02: First LLM Agent"
 layout: :theme/page
 ---
 
@@ -100,4 +100,4 @@ Navigate to the variant you chose and run:
   </div>
 </div>
 
-The `*` wildcard tells Camel CLI to load all files in the directory — routes, properties, and Forage configuration.
+The `*` wildcard tells Camel CLI to load all files in the directory: routes, properties, and Forage configuration.

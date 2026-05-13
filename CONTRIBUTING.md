@@ -4,7 +4,7 @@ Thank you for your interest in contributing to the Camel AI Workshop!
 
 ## How to contribute
 
-1. **Open an issue first** — Before submitting a pull request, please open an issue describing the bug, improvement, or new content you'd like to propose. This helps us discuss the approach before any code is written.
+1. **Open an issue first.** Before submitting a pull request, please open an issue describing the bug, improvement, or new content you'd like to propose. This helps us discuss the approach before any code is written.
 2. **Fork the repository** and create a branch for your changes.
 3. **Submit a pull request** referencing the issue.
 
@@ -14,9 +14,20 @@ The documentation site is built with [Quarkus Roq](https://docs.quarkiverse.io/q
 
 ### Running locally
 
+First, install [JBang](https://www.jbang.dev/documentation/jbang/latest/installation.html#installation-methods).
+
+Then install the Roq CLI:
+
+```shell
+jbang trust add https://repo1.maven.org/maven2/io/quarkiverse/roq/
+jbang app install --fresh --force roq@quarkiverse/quarkus-roq
+```
+
+Start the dev server:
+
 ```shell
 cd docs
-./mvnw quarkus:dev
+roq start
 ```
 
 The site will be available at http://localhost:8080 with hot reload.
@@ -39,7 +50,7 @@ The site is automatically deployed to GitHub Pages on every push to `main`. Pull
 
 Each step is a self-contained directory under `section-1/`. Steps with LLM integration have two variant subdirectories:
 
-- `openai/` — uses the `openai:chat-completion` Camel component
-- `langchain4j/` — uses `langchain4j-agent` backed by Forage
+- `openai/`: uses the `openai:chat-completion` Camel component
+- `langchain4j/`: uses `langchain4j-agent` backed by Forage
 
 When modifying a step's source files, make sure to update the corresponding documentation page in `docs/content/` if code snippets are referenced there.

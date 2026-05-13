@@ -1,5 +1,5 @@
 ---
-title: "Step 01 — Introduction to Camel CLI"
+title: "Step 01: Introduction to Camel CLI"
 layout: :theme/page
 ---
 
@@ -48,4 +48,4 @@ You should see "Hello from Apache Camel!" printed every 5 seconds. Press `Ctrl+C
 
 Open the `route.camel.yaml` file in VS Code. If the Kaoto extension is installed, you can click the Kaoto icon to see a visual representation of the route. This visual editor works for all `.camel.yaml` files and will become increasingly useful as routes grow more complex.
 
-You can also edit routes visually in Kaoto — adding components, configuring parameters, and connecting steps by drag-and-drop. The YAML file updates automatically.
+You can also edit routes visually in Kaoto: add components, configure parameters, and connect steps by drag-and-drop. The YAML file updates automatically.
