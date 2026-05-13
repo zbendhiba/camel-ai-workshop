@@ -1,0 +1,91 @@
+---
+title: "Step 02: Introduction to Camel CLI"
+layout: :theme/page
+---
+
+<div class="content-prose dark:prose-invert">
+
+<p>In this step, you'll create your first Apache Camel route. Instead of writing YAML by hand, you'll ask your AI assistant to generate it using the Camel MCP Server. Then you'll run it with the Camel CLI and visualize it in Kaoto.</p>
+
+<h2>Creating your first route</h2>
+
+<p>Navigate to the step directory:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Terminal</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">cd</span> step-02</span>
+  </div>
+</div>
+
+<p>Start your AI coding assistant from this directory (Claude Code, Bob Shell, or whichever tool you configured). Then ask it to create a route file:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Prompt</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Using the Camel MCP server, create a route.camel.yaml file with a timer that fires every 5 seconds, sets the body to "Hello from Apache Camel!", and logs it.</span></span>
+  </div>
+</div>
+
+<p>The assistant uses the Camel catalog to look up the <code>timer</code> component and generates the route file. Your <code>route.camel.yaml</code> should look like this:</p>
+
+<pre><code class="language-yaml">- route:
+    id: hello-camel
+    from:
+      uri: timer:hello
+      parameters:
+        period: 5000
+      steps:
+        - setBody:
+            constant: "Hello from Apache Camel!"
+        - log:
+            message: "$\{body}"</code></pre>
+
+<h2>Running the route</h2>
+
+<p>Open a terminal in the step directory and run:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Run</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
+  </div>
+</div>
+
+<p>You should see "Hello from Apache Camel!" printed every 5 seconds. Press <code>Ctrl+C</code> to stop.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>The <code>*</code> wildcard tells Camel CLI to load all files in the directory: routes, properties, and configuration files.</p>
+</div>
+
+<h2>Visualizing with Kaoto</h2>
+
+<p>Open the <code>route.camel.yaml</code> file in VS Code. If the Kaoto extension is installed, you can click the Kaoto icon to see a visual representation of the route. This visual editor will become increasingly useful as routes grow more complex.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>Route files must use the <code>.camel.yaml</code> extension for Kaoto to recognize them and enable the visual editor.</p>
+</div>
+
+<p>You can also edit routes visually in Kaoto: add components, configure parameters, and connect steps by drag-and-drop. The YAML file updates automatically.</p>
+
+</div>

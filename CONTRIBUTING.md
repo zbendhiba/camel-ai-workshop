@@ -48,7 +48,7 @@ The site is automatically deployed to GitHub Pages on every push to `main`. Pull
 
 ## Workshop steps
 
-Each step is a self-contained directory under `section-1/`. Steps with LLM integration have two variant subdirectories:
+Each step is a self-contained directory at the project root (`step-01/`, `step-02/`, etc.). Steps with LLM integration have two variant subdirectories:
 
 - `openai/`: uses the `openai:chat-completion` Camel component
 - `langchain4j/`: uses `langchain4j-agent` backed by Forage

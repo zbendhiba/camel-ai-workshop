@@ -12,14 +12,14 @@ Each step is a self-contained directory. Steps with LLM integration have two var
 
 ```bash
 # Run any step (step-01 has no variants)
-cd section-1/step-01
+cd step-01
 camel run *
 
 # For steps with variants, choose one
-cd section-1/step-02/openai      # simple, direct OpenAI calls
+cd step-02/openai      # simple, direct OpenAI calls
 camel run *
 
-cd section-1/step-02/langchain4j  # Forage-backed agent with memory
+cd step-02/langchain4j  # Forage-backed agent with memory
 camel run *
 ```
 
@@ -27,14 +27,13 @@ camel run *
 
 ```bash
 cd docs
-./mvnw quarkus:dev    # http://localhost:8080 with hot reload
-./mvnw package        # build static HTML to target/
+roq start             # http://localhost:8080 with hot reload
 ```
 
 ## Project Structure
 
-- **`section-1/step-01`**: No LLM, single `route.camel.yaml` at step root
-- **`section-1/step-02` through `step-10`**: Each step has `openai/` and `langchain4j/` subdirectories
+- **`step-01`**: No LLM, single `route.camel.yaml` at step root
+- **`step-02` through `step-10`**: Each step has `openai/` and `langchain4j/` subdirectories
   - `openai/`: `route.camel.yaml` + `application.properties` (config via `camel.component.openai.*`)
   - `langchain4j/`: `route.camel.yaml` + `forage-agent-factory.properties` (config via Forage beans)
   - Shared `data/` directory at step root when both variants need the same input files
