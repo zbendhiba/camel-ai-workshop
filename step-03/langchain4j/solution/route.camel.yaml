@@ -10,4 +10,4 @@
         - to:
             uri: langchain4j-agent:myAgent
         - log:
-            message: "Agent response:\n${body}"
+            message: "${body}"

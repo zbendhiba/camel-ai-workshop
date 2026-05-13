@@ -5,7 +5,7 @@ layout: :theme/page
 
 <div class="content-prose dark:prose-invert">
 
-<p>Now that you have a working Camel route, it's time to connect it to a Large Language Model. In this step, you will invoke an LLM from a Camel route using two different approaches: the <strong>OpenAI component</strong> for a simple, direct call, or <strong>LangChain4j with Forage</strong> for a richer setup with memory and extensibility.</p>
+<p>Now that you have a working Camel route, it's time to connect it to a Large Language Model. You'll call an LLM from a Camel route using one of two approaches: the <strong>OpenAI component</strong> for simple, direct calls, or <strong>LangChain4j with Forage</strong> for a setup with memory, tools, and guardrails.</p>
 
 <h2>Choosing your approach</h2>
 
@@ -13,7 +13,38 @@ layout: :theme/page
 
 <p>The <a href="https://camel.apache.org/components/next/langchain4j-agent-component.html" target="_blank">LangChain4j Agent component</a> is backed by <a href="https://kaotoio.github.io/forage/" target="_blank">Forage</a>, which configures AI beans through a properties file. It adds memory, tool support, and guardrails on top of the basic LLM call. Choose this approach when you need conversational context or plan to add tools later.</p>
 
-<h2>The route</h2>
+<h2>Create your Route</h2>
+
+<p>The route you're about to build is simple. A timer fires once, sets a question as the message body, sends it to an LLM, and logs the response. Here's the flow:</p>
+
+<div style="background: #1e1e2e; border: 1px solid #404040; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 0.95rem; color: #cdd6f4; overflow-x: auto;">
+<span style="color: #f38ba8;">Timer</span> <span style="color: #6c7086;">(fire once)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">SetBody</span> <span style="color: #6c7086;">(prompt)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">LLM</span> <span style="color: #6c7086;">(call)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">Log</span> <span style="color: #6c7086;">(response)</span>
+</div>
+
+<p>From the workshop root directory, ask your AI assistant to generate the route. Pick the tab matching the approach you chose:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-tabs">
+      <button class="roq-terminal-tab active" data-tab="0">OpenAI</button>
+      <button class="roq-terminal-tab" data-tab="1">LangChain4j</button>
+    </span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body roq-terminal-pane active" data-tab="0">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Use the Camel MCP tools to look up the OpenAI component, then create a route.camel.yaml file in step-03/openai/ with a route named "first-llm". It should use a timer that fires once, set the body to "What are the main Enterprise Integration Patterns used in messaging systems? Answer in 3 bullet points.", send it to the Camel OpenAI component, and log the response. The OpenAI component is configured via an application.properties file, so don't put the API key or model in the route.</span></span>
+  </div>
+  <div class="roq-terminal-body roq-terminal-pane" data-tab="1">
+    <span class="line"><span class="prompt">&gt;</span> <span class="cmd">Use the Camel MCP tools to look up the LangChain4j Agent component, then create a route.camel.yaml file in step-03/langchain4j/ with a route named "first-agent". It should use a timer that fires once, set the body to "What are the main Enterprise Integration Patterns used in messaging systems? Answer in 3 bullet points.", send it to the LangChain4j Agent component with agent ID "myAgent", and log the response.</span></span>
+  </div>
+</div>
+
+<h2>What the route looks like</h2>
+
+<p>Your generated route should look similar to this:</p>
 
 <div class="roq-content-tabs">
   <div class="roq-content-tabs-bar">
@@ -21,7 +52,6 @@ layout: :theme/page
     <button class="roq-content-tab" data-tab="1">LangChain4j</button>
   </div>
   <div class="roq-content-pane active" data-tab="0">
-    <p>The route sends a prompt to the LLM and logs the response:</p>
 <pre><code class="language-yaml">- route:
     id: first-llm
     from:
@@ -37,22 +67,21 @@ layout: :theme/page
             description: Call the LLM
             uri: openai:chat-completion
         - log:
-            message: "LLM response:\n$\{body}"</code></pre>
+            message: "$\{body}"</code></pre>
 
-    <p>Configuration lives in <code>application.properties</code>:</p>
-<pre><code class="language-properties"># OpenAI
-camel.component.openai.model=gpt-4o
-camel.component.openai.apiKey=$\{OPENAI_API_KEY}
+    <p>The <code>openai:chat-completion</code> URI sends the message body to the OpenAI component. No configuration needed in the route. The model, API key, and base URL all live in <code>application.properties</code>:</p>
+<pre><code class="language-properties"># Ollama (OpenAI-compatible API)
+camel.component.openai.model=granite4:7b-a1b-h
+camel.component.openai.baseUrl=http://localhost:11434/v1
+camel.component.openai.apiKey=ollama
 
-# Or use Ollama (OpenAI-compatible API):
-# camel.component.openai.model=granite4:7b-a1b-h
-# camel.component.openai.baseUrl=http://localhost:11434/v1
-# camel.component.openai.apiKey=ollama</code></pre>
+# Or use OpenAI directly:
+# camel.component.openai.model=gpt-5
+# camel.component.openai.apiKey=$\{OPENAI_API_KEY}</code></pre>
 
-    <p>To use Ollama instead of OpenAI, uncomment the Ollama lines and comment out the OpenAI ones. Ollama exposes an OpenAI-compatible API at <code>http://localhost:11434/v1</code>.</p>
+    <p>This keeps credentials out of the route. Switch between Ollama and OpenAI by changing the properties file.</p>
   </div>
   <div class="roq-content-pane" data-tab="1">
-    <p>The same route, but using the LangChain4j component:</p>
 <pre><code class="language-yaml">- route:
     id: first-agent
     from:
@@ -65,23 +94,46 @@ camel.component.openai.apiKey=$\{OPENAI_API_KEY}
         - to:
             uri: langchain4j-agent:myAgent
         - log:
-            message: "Agent response:\n$\{body}"</code></pre>
+            message: "$\{body}"</code></pre>
 
-    <p>The <code>langchain4j-agent:myAgent</code> URI references a bean configured by Forage in a properties file:</p>
+    <p>The <code>langchain4j-agent:myAgent</code> URI sends the message body to an agent identified by <code>myAgent</code>. That name must match a bean configured by <a href="https://kaotoio.github.io/forage/" target="_blank">Forage</a> and automatically bound in the Camel context registry. The configuration lives in <code>forage-agent-factory.properties</code>:</p>
 <pre><code class="language-properties">forage.myAgent.agent.model.kind=ollama
 forage.myAgent.agent.model.name=granite4:7b-a1b-h
-forage.myAgent.agent.base.url=http://localhost:11434
-forage.myAgent.agent.features=memory
-forage.myAgent.agent.memory.kind=message-window
-forage.myAgent.agent.memory.max.messages=10</code></pre>
+forage.myAgent.agent.base.url=http://localhost:11434</code></pre>
 
-    <p>The agent has memory enabled (<code>message-window</code>), meaning it can maintain context across multiple interactions within the same session. This will become important in later steps.</p>
+    <p>Every property starts with <code>forage.myAgent</code>. That prefix ties the configuration to the <code>myAgent</code> bean referenced in the route.</p>
+
+    <div class="markdown-alert markdown-alert-note">
+      <p class="markdown-alert-title">Note</p>
+      <p>Forage is optional. You can skip it and <a href="https://camel.apache.org/components/next/langchain4j-agent-component.html#_creating_custom_agents" target="_blank">create agents with Java beans</a> directly by binding an <code>AgentWithMemory</code> or <code>AgentWithoutMemory</code> instance to the Camel registry.</p>
+    </div>
   </div>
 </div>
 
+<h2>Visualize the Route in VS Code</h2>
+
+<p>Open the <code>route.camel.yaml</code> file in VS Code to see it rendered in Kaoto. Here's the LangChain4j route:</p>
+
+<img src="kaoto-step3-langchain4j.png" alt="Kaoto visual editor showing the first-agent route with timer, setBody, langchain4j-agent, and log steps" style="border-radius: 0.75rem; border: 1px solid #404040; margin: 1rem 0;" />
+
 <h2>Running the step</h2>
 
-<p>Navigate to the variant you chose and run:</p>
+<p>Make sure Ollama is running with the model loaded:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Terminal</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">ollama</span> run granite4:7b-a1b-h</span>
+  </div>
+</div>
+
+<p>Then navigate to the variant you chose and run:</p>
 
 <div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
   <div class="roq-terminal-bar">
@@ -103,5 +155,7 @@ forage.myAgent.agent.memory.max.messages=10</code></pre>
     <span class="line" style="--line-index: 1"><span class="prompt">$</span> <span class="cmd">camel</span> run *</span>
   </div>
 </div>
+
+<p>You just connected a Camel route to a Large Language Model for the first time. In the next step, you'll use the LLM to classify data and route messages based on its response.</p>
 
 </div>
