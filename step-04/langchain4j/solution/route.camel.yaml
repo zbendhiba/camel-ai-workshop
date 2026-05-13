@@ -1,5 +1,5 @@
 - route:
-    id: classify-messages
+    id: triage-agent
     from:
       uri: file:../data
       parameters:
@@ -31,7 +31,7 @@
               - simple: "${variable.category} == 'QUESTION'"
                 steps:
                   - to:
-                      uri: direct:handle-question
+                      uri: direct:handle-question-agent
             otherwise:
               steps:
                 - to:
@@ -46,9 +46,9 @@
             message: "COMPLAINT detected — escalating: ${body}"
 
 - route:
-    id: handle-question
+    id: handle-question-agent
     from:
-      uri: direct:handle-question
+      uri: direct:handle-question-agent
       steps:
         - log:
             message: "QUESTION detected — generating answer for: ${body}"

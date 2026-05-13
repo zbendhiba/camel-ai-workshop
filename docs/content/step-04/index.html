@@ -5,15 +5,15 @@ layout: :theme/page
 
 <div class="content-prose dark:prose-invert">
 
-<p>In the previous step, you sent a single question to an LLM and logged the response. Now you'll use an LLM to make routing decisions. The LLM classifies incoming messages. Camel routes each one to a different handler based on that classification.</p>
+<p>In the previous step, you sent a single question to an LLM and logged the response. Now you'll embed an LLM call inside a Camel route to make routing decisions. The LLM classifies incoming messages. Camel routes each one to a different handler based on what the LLM decided.</p>
 
-<p>This is where Camel's integration patterns and LLMs start working together. A standalone LLM framework can classify text, but it can't route messages across systems. Camel can.</p>
+<p>This is where Camel's integration patterns and LLMs start working together. A standalone LLM framework can classify text, but it can't route messages across systems. Camel can. The idea is simple: combine the LLM with the existing <code>choice</code> EIP. The LLM analyzes the message and produces a category. The <code>choice</code> uses that category to route. Each does what it's good at.</p>
 
 <h2>The Content-Based Router</h2>
 
 <p>The <a href="https://www.enterpriseintegrationpatterns.com/ContentBasedRouter.html" target="_blank">Content-Based Router</a> is a classic Enterprise Integration Pattern. It inspects each message and sends it to a different destination based on its content. In Camel, this is the <a href="https://camel.apache.org/components/next/eips/choice-eip.html" target="_blank"><code>choice</code> EIP</a>.</p>
 
-<p>Normally, the router checks a header or a field in the message body. In this step, the "content" is the LLM's classification. The LLM reads customer messages and returns a category: COMPLAINT, QUESTION, or PRAISE. Camel's <code>choice</code> then routes each message to the right handler.</p>
+<p>Normally, the router checks a header or a field in the message body. Here, the routing decision is delegated to an LLM. The LLM reads customer messages and returns a category: COMPLAINT, QUESTION, or PRAISE. Camel's <code>choice</code> then routes each message to the right handler based on what the LLM decided.</p>
 
 <h2>The scenario</h2>
 
@@ -21,19 +21,23 @@ layout: :theme/page
 
 <h2>Create your Routes</h2>
 
-<p>You'll build this step in two parts. Start with the handler routes, already provided. Then create the classification route that reads files, calls the LLM, and dispatches to those handlers.</p>
+<p>You'll build this step in two parts. Start with the handler routes, already provided. Then create the triage agent route that reads files, classifies them via the LLM, and dispatches to those handlers.</p>
 
 <div style="background: #1e1e2e; border: 1px solid #404040; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 0.95rem; color: #cdd6f4; overflow-x: auto;">
-<span style="color: #f38ba8;">File</span> <span style="color: #6c7086;">(read)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">LLM</span> <span style="color: #6c7086;">(classify)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">COMPLAINT</span> <span style="color: #6c7086;">handler</span><br/>
-<span style="color: #1e1e2e;">File (read) --&gt; LLM (classify) --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">QUESTION</span> <span style="color: #6c7086;">handler</span><br/>
-<span style="color: #1e1e2e;">File (read) --&gt; LLM (classify) --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">OTHER</span> <span style="color: #6c7086;">handler</span>
+<span style="color: #f38ba8;">File</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">Triage Agent</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">COMPLAINT</span> <span style="color: #6c7086;">handler</span><br/>
+<span style="color: #1e1e2e;">File --&gt; Triage Agent --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">Question Agent</span><br/>
+<span style="color: #1e1e2e;">File --&gt; Triage Agent --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">OTHER</span> <span style="color: #6c7086;">handler</span>
 </div>
 
 <h3>Part 1: The handler routes</h3>
 
-<p>Open the <code>route.camel.yaml</code> file in your step directory. Three handler routes are already there. Two of them are simple: they consume from a <a href="https://camel.apache.org/components/next/direct-component.html" target="_blank">Direct</a> endpoint and log the message.</p>
+<p>Open the <code>route.camel.yaml</code> file in your step directory. Three handler routes are already there.</p>
 
 <p>The <code>direct</code> component is how Camel connects routes together within the same application. When another route sends a message to <code>direct:handle-complaint</code>, it arrives here. Think of it as an internal method call between routes.</p>
+
+<h4>Simple handlers</h4>
+
+<p>Two handlers are simple. They consume from a <a href="https://camel.apache.org/components/next/direct-component.html" target="_blank">Direct</a> endpoint and log the message.</p>
 
 <pre><code class="language-yaml">- route:
     id: handle-complaint
@@ -51,7 +55,9 @@ layout: :theme/page
         - log:
             message: "OTHER/PRAISE: $\{body}"</code></pre>
 
-<p>The third handler is more interesting. The <code>handle-question</code> route sends the customer message to the LLM to generate an answer. This works exactly like the LLM call you built in step 03.</p>
+<h4>The Question Agent route</h4>
+
+<p>The <code>handle-question-agent</code> route is more interesting. It sends the customer message to the LLM to generate an answer. This works exactly like the LLM call you built in step 03.</p>
 
 <div class="roq-content-tabs">
   <div class="roq-content-tabs-bar">
@@ -60,9 +66,9 @@ layout: :theme/page
   </div>
   <div class="roq-content-pane active" data-tab="0">
 <pre><code class="language-yaml">- route:
-    id: handle-question
+    id: handle-question-agent
     from:
-      uri: direct:handle-question
+      uri: direct:handle-question-agent
       steps:
         - log:
             message: "QUESTION detected: $\{body}"
@@ -78,9 +84,9 @@ layout: :theme/page
   </div>
   <div class="roq-content-pane" data-tab="1">
 <pre><code class="language-yaml">- route:
-    id: handle-question
+    id: handle-question-agent
     from:
-      uri: direct:handle-question
+      uri: direct:handle-question-agent
       steps:
         - log:
             message: "QUESTION detected: $\{body}"
@@ -93,20 +99,20 @@ layout: :theme/page
   </div>
 </div>
 
-<h3>Part 2: The classification route</h3>
+<h3>Part 2: The Triage Agent route</h3>
 
-<p>Now add the main route to the same file. Think of this route as the main agent. It reads each file, asks the LLM to classify it, and decides what to do next. For complaints and praise, it takes a quick action (just logging). For questions, it delegates to the <code>handle-question</code> route. That route calls the LLM again to generate an answer.</p>
+<p>Now add the triage agent route to the same file. It reads each file, asks the LLM to classify it, and decides what to do next. For complaints and praise, it takes a quick action (just logging). For questions, it delegates to the Question Agent route. That route calls the LLM again to generate an answer.</p>
 
 <p>This is a common pattern in agentic systems. One agent triages incoming work and dispatches to specialized agents. Here, Camel's <code>choice</code> EIP handles the dispatching.</p>
 
-<p>Add a route named <code>classify-messages</code> to the existing <code>route.camel.yaml</code> file in <code>step-04/langchain4j/</code>. Use the LangChain4j Agent component with agent ID <code>classifier</code>. This route should:</p>
+<p>Add a route named <code>triage-agent</code> to the existing <code>route.camel.yaml</code> file in <code>step-04/langchain4j/</code>. Use the LangChain4j Agent component with agent ID <code>classifier</code>. This route should:</p>
 
 <ol>
   <li>Read files from the <code>../data</code> directory without moving or deleting them</li>
   <li>Save the original message body (you'll need it later)</li>
   <li>Send the message to the LLM for classification as COMPLAINT, QUESTION, or PRAISE</li>
   <li>Restore the original message body</li>
-  <li>Use the <code>choice</code> EIP to dispatch to <code>direct:handle-complaint</code>, <code>direct:handle-question</code>, or <code>direct:handle-other</code></li>
+  <li>Use the <code>choice</code> EIP to dispatch to <code>direct:handle-complaint</code>, <code>direct:handle-question-agent</code>, or <code>direct:handle-other</code></li>
 </ol>
 
 <p>Use the Camel MCP tools and the Kaoto editor to build this route. The Camel MCP Server can help you look up the file component, the LangChain4j Agent component, and the choice EIP.</p>
@@ -163,7 +169,7 @@ layout: :theme/page
   <p>The section below describes the solution. Try building the route yourself first using the Camel MCP tools and the Kaoto editor. Come back here once you're done or if you get stuck.</p>
 </div>
 
-<p>The route has three key parts:</p>
+<p>The triage agent route has three key parts:</p>
 
 <h3>1. Save the original body</h3>
 
@@ -210,7 +216,7 @@ layout: :theme/page
       - simple: "$\{variable.category} == 'QUESTION'"
         steps:
           - to:
-              uri: direct:handle-question
+              uri: direct:handle-question-agent
     otherwise:
       steps:
         - to:
@@ -239,7 +245,7 @@ layout: :theme/page
   "additionalProperties": false
 }</code></pre>
 
-<p>Try building the same classification route for the OpenAI variant. The handler routes are already in <code>step-04/openai/route.camel.yaml</code>. Add a <code>classify-messages</code> route that uses this schema. Use the Camel MCP tools to look up the OpenAI component, the <code>jsonSchema</code> parameter, and the <code>jsonpath</code> language to extract the category from the JSON response.</p>
+<p>Try building the same triage agent route for the OpenAI variant. The handler routes are already in <code>step-04/openai/route.camel.yaml</code>. Add a <code>triage-agent</code> route that uses this schema. Use the Camel MCP tools to look up the OpenAI component, the <code>jsonSchema</code> parameter, and the <code>jsonpath</code> language to extract the category from the JSON response.</p>
 
 <h3>Solution walkthrough</h3>
 
@@ -248,7 +254,7 @@ layout: :theme/page
   <p>Try building the route yourself first. Come back here once you're done or if you get stuck.</p>
 </div>
 
-<p>The classification route follows the same structure as the LangChain4j variant, with a few differences.</p>
+<p>The triage agent route follows the same structure as the LangChain4j variant, with a few differences.</p>
 
 <h4>1. Classify with structured output</h4>
 
@@ -291,7 +297,7 @@ layout: :theme/page
       - simple: "$\{variable.category} == 'QUESTION'"
         steps:
           - to:
-              uri: direct:handle-question
+              uri: direct:handle-question-agent
     otherwise:
       steps:
         - to:
@@ -306,7 +312,7 @@ layout: :theme/page
 
 <h2>Conclusion</h2>
 
-<p>You built a route where an LLM classifies incoming messages. Camel's Content-Based Router dispatches them to specialized handlers. This is the core pattern behind agentic workflows. One agent triages, others execute.</p>
+<p>You built a triage agent that classifies incoming messages via an LLM. Camel's Content-Based Router dispatches them to specialized handlers and agents. This is the core pattern behind agentic workflows. One agent triages, others execute.</p>
 
 <p>You also learned how to preserve the message body across LLM calls using variables. And how the <code>direct</code> component connects routes together.</p>
 

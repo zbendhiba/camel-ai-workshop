@@ -7,9 +7,9 @@
             message: "COMPLAINT detected: ${body}"
 
 - route:
-    id: handle-question
+    id: handle-question-agent
     from:
-      uri: direct:handle-question
+      uri: direct:handle-question-agent
       steps:
         - log:
             message: "QUESTION detected: ${body}"
