@@ -1,147 +1,71 @@
 ---
-title: "Step 04: LLM Classification with Content-Based Router"
+title: "Step 04: LLM Classification"
 layout: :theme/page
 ---
 
 <div class="content-prose dark:prose-invert">
 
-<p>This step demonstrates one of the most powerful combinations in this workshop: using an LLM to make routing decisions within a Camel Content-Based Router. Instead of routing based on simple header values or message format, the LLM classifies the message semantically, and Camel routes it accordingly.</p>
+<p>In the previous step, you sent a single question to an LLM and logged the response. Now you'll use an LLM to make routing decisions. The LLM classifies incoming messages. Camel routes each one to a different handler based on that classification.</p>
 
-<p>This is something a standalone LLM framework cannot do natively. Camel's EIP-driven orchestration adds a dimension that goes beyond simple prompt-response interactions.</p>
+<p>This is where Camel's integration patterns and LLMs start working together. A standalone LLM framework can classify text, but it can't route messages across systems. Camel can.</p>
+
+<h2>The Content-Based Router</h2>
+
+<p>The <a href="https://www.enterpriseintegrationpatterns.com/ContentBasedRouter.html" target="_blank">Content-Based Router</a> is a classic Enterprise Integration Pattern. It inspects each message and sends it to a different destination based on its content. In Camel, this is the <a href="https://camel.apache.org/components/next/eips/choice-eip.html" target="_blank"><code>choice</code> EIP</a>.</p>
+
+<p>Normally, the router checks a header or a field in the message body. In this step, the "content" is the LLM's classification. The LLM reads customer messages and returns a category: COMPLAINT, QUESTION, or PRAISE. Camel's <code>choice</code> then routes each message to the right handler.</p>
 
 <h2>The scenario</h2>
 
-<p>Customer messages arrive as text files in a <code>data/</code> directory. Each message needs to be classified as a COMPLAINT, QUESTION, or PRAISE, then routed to a specialized handler. The LLM handles the classification, and Camel handles the routing logic.</p>
+<p>Customer messages arrive as text files in a <code>data/</code> directory. Each message needs to be classified as a COMPLAINT, QUESTION, or PRAISE, then routed to a specialized handler.</p>
 
-<h2>The classification route</h2>
+<h2>Create your Routes</h2>
 
-<p>The main route reads files, sends them to the LLM for classification, then uses a <code>choice</code> (Content-Based Router) to dispatch:</p>
+<p>You'll build this step in two parts. Start with the handler routes, already provided. Then create the classification route that reads files, calls the LLM, and dispatches to those handlers.</p>
 
-<div class="roq-content-tabs">
-  <div class="roq-content-tabs-bar">
-    <button class="roq-content-tab active" data-tab="0">OpenAI</button>
-    <button class="roq-content-tab" data-tab="1">LangChain4j</button>
-  </div>
-  <div class="roq-content-pane active" data-tab="0">
-<pre><code class="language-yaml">- route:
-    id: classify-messages
-    from:
-      uri: file:../data
-      parameters:
-        noop: true
-      steps:
-        - log:
-            message: "Processing: $\{headers.CamelFileName}"
-        - setVariable:
-            name: originalMessage
-            simple: "$\{body}"
-        - setHeader:
-            name: CamelOpenAISystemMessage
-            constant: >-
-              You are a message classifier. You MUST reply with exactly one word:
-              COMPLAINT, QUESTION, or PRAISE. Nothing else.
-        - setBody:
-            simple: "Classify this message:\n$\{variable.originalMessage}"
-        - to:
-            description: Classify via LLM
-            uri: openai:chat-completion
-            parameters:
-              temperature: 0.0
-        - setVariable:
-            name: category
-            simple: "$\{body.trim()}"
-        - setBody:
-            simple: "$\{variable.originalMessage}"
-        - log:
-            message: "Category: $\{variable.category} — File: $\{headers.CamelFileName}"
-        - choice:
-            when:
-              - simple: "$\{variable.category} == 'COMPLAINT'"
-                steps:
-                  - to:
-                      uri: direct:handle-complaint
-              - simple: "$\{variable.category} == 'QUESTION'"
-                steps:
-                  - to:
-                      uri: direct:handle-question
-            otherwise:
-              steps:
-                - to:
-                    uri: direct:handle-other</code></pre>
-    <p>Notice the use of <code>CamelOpenAISystemMessage</code> header to set the system prompt, and <code>temperature: 0.0</code> on the endpoint for deterministic classification. The original message is preserved in a variable before sending the classification prompt.</p>
-  </div>
-  <div class="roq-content-pane" data-tab="1">
-<pre><code class="language-yaml">- route:
-    id: classify-messages
-    from:
-      uri: file:../data
-      parameters:
-        noop: true
-      steps:
-        - log:
-            message: "Processing: $\{headers.CamelFileName}"
-        - setHeader:
-            name: originalMessage
-            simple: "$\{body}"
-        - setBody:
-            simple: >
-              Classify the following customer message into exactly one category:
-              COMPLAINT, QUESTION, or PRAISE.
-              Reply with ONLY the category name, nothing else.
-
-              Message: $\{headers.originalMessage}
-        - to:
-            uri: langchain4j-agent:classifier
-        - setHeader:
-            name: category
-            simple: "$\{body.trim()}"
-        - setBody:
-            simple: "$\{headers.originalMessage}"
-        - log:
-            message: "Category: $\{headers.category} — File: $\{headers.CamelFileName}"
-        - choice:
-            when:
-              - simple: "$\{headers.category} == 'COMPLAINT'"
-                steps:
-                  - to:
-                      uri: direct:handle-complaint
-              - simple: "$\{headers.category} == 'QUESTION'"
-                steps:
-                  - to:
-                      uri: direct:handle-question
-            otherwise:
-              steps:
-                - to:
-                    uri: direct:handle-other</code></pre>
-    <p>The classification prompt is embedded directly in the body. Forage handles the model configuration, including temperature, in the properties file.</p>
-  </div>
+<div style="background: #1e1e2e; border: 1px solid #404040; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 0.95rem; color: #cdd6f4; overflow-x: auto;">
+<span style="color: #f38ba8;">File</span> <span style="color: #6c7086;">(read)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">LLM</span> <span style="color: #6c7086;">(classify)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">COMPLAINT</span> <span style="color: #6c7086;">handler</span><br/>
+<span style="color: #1e1e2e;">File (read) --&gt; LLM (classify) --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">QUESTION</span> <span style="color: #6c7086;">handler</span><br/>
+<span style="color: #1e1e2e;">File (read) --&gt; LLM (classify) --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">OTHER</span> <span style="color: #6c7086;">handler</span>
 </div>
 
-<h2>The handler routes</h2>
+<h3>Part 1: The handler routes</h3>
 
-<p>Each category has its own handler. The question handler sends the original message back to the LLM to generate a response:</p>
+<p>Open the <code>route.camel.yaml</code> file in your step directory. Three handler routes are already there. Two of them are simple: they consume from a <a href="https://camel.apache.org/components/next/direct-component.html" target="_blank">Direct</a> endpoint and log the message.</p>
 
-<div class="roq-content-tabs">
-  <div class="roq-content-tabs-bar">
-    <button class="roq-content-tab active" data-tab="0">OpenAI</button>
-    <button class="roq-content-tab" data-tab="1">LangChain4j</button>
-  </div>
-  <div class="roq-content-pane active" data-tab="0">
+<p>The <code>direct</code> component is how Camel connects routes together within the same application. When another route sends a message to <code>direct:handle-complaint</code>, it arrives here. Think of it as an internal method call between routes.</p>
+
 <pre><code class="language-yaml">- route:
     id: handle-complaint
     from:
       uri: direct:handle-complaint
       steps:
         - log:
-            message: "COMPLAINT detected — escalating: $\{body}"
+            message: "COMPLAINT detected: $\{body}"
 
 - route:
+    id: handle-other
+    from:
+      uri: direct:handle-other
+      steps:
+        - log:
+            message: "OTHER/PRAISE: $\{body}"</code></pre>
+
+<p>The third handler is more interesting. The <code>handle-question</code> route sends the customer message to the LLM to generate an answer. This works exactly like the LLM call you built in step 03.</p>
+
+<div class="roq-content-tabs">
+  <div class="roq-content-tabs-bar">
+    <button class="roq-content-tab active" data-tab="0">OpenAI</button>
+    <button class="roq-content-tab" data-tab="1">LangChain4j</button>
+  </div>
+  <div class="roq-content-pane active" data-tab="0">
+<pre><code class="language-yaml">- route:
     id: handle-question
     from:
       uri: direct:handle-question
       steps:
         - log:
-            message: "QUESTION detected — generating answer for: $\{body}"
+            message: "QUESTION detected: $\{body}"
         - setHeader:
             name: CamelOpenAISystemMessage
             constant: >-
@@ -150,54 +74,66 @@ layout: :theme/page
             description: Generate answer
             uri: openai:chat-completion
         - log:
-            message: "Generated answer: $\{body}"
-
-- route:
-    id: handle-other
-    from:
-      uri: direct:handle-other
-      steps:
-        - log:
-            message: "OTHER/PRAISE — acknowledged: $\{body}"</code></pre>
+            message: "Generated answer: $\{body}"</code></pre>
   </div>
   <div class="roq-content-pane" data-tab="1">
 <pre><code class="language-yaml">- route:
-    id: handle-complaint
-    from:
-      uri: direct:handle-complaint
-      steps:
-        - log:
-            message: "COMPLAINT detected — escalating: $\{body}"
-
-- route:
     id: handle-question
     from:
       uri: direct:handle-question
       steps:
         - log:
-            message: "QUESTION detected — generating answer for: $\{body}"
+            message: "QUESTION detected: $\{body}"
         - setBody:
             simple: "Answer this customer question concisely: $\{body}"
         - to:
             uri: langchain4j-agent:classifier
         - log:
-            message: "Generated answer: $\{body}"
-
-- route:
-    id: handle-other
-    from:
-      uri: direct:handle-other
-      steps:
-        - log:
-            message: "OTHER/PRAISE — acknowledged: $\{body}"</code></pre>
+            message: "Generated answer: $\{body}"</code></pre>
   </div>
 </div>
 
-<h2>Sample data</h2>
+<h3>Part 2: The classification route</h3>
 
-<p>The <code>data/</code> directory is shared between both variants and contains sample messages for each category. You can add your own text files to test the classification.</p>
+<p>Now add the main route to the same file. Think of this route as the main agent. It reads each file, asks the LLM to classify it, and decides what to do next. For complaints and praise, it takes a quick action (just logging). For questions, it delegates to the <code>handle-question</code> route. That route calls the LLM again to generate an answer.</p>
+
+<p>This is a common pattern in agentic systems. One agent triages incoming work and dispatches to specialized agents. Here, Camel's <code>choice</code> EIP handles the dispatching.</p>
+
+<p>Add a route named <code>classify-messages</code> to the existing <code>route.camel.yaml</code> file in <code>step-04/langchain4j/</code>. Use the LangChain4j Agent component with agent ID <code>classifier</code>. This route should:</p>
+
+<ol>
+  <li>Read files from the <code>../data</code> directory without moving or deleting them</li>
+  <li>Save the original message body (you'll need it later)</li>
+  <li>Send the message to the LLM for classification as COMPLAINT, QUESTION, or PRAISE</li>
+  <li>Restore the original message body</li>
+  <li>Use the <code>choice</code> EIP to dispatch to <code>direct:handle-complaint</code>, <code>direct:handle-question</code>, or <code>direct:handle-other</code></li>
+</ol>
+
+<p>Use the Camel MCP tools and the Kaoto editor to build this route. The Camel MCP Server can help you look up the file component, the LangChain4j Agent component, and the choice EIP.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>The <code>data/</code> directory contains sample messages for each category. You can add your own text files to test the classification.</p>
+</div>
 
 <h2>Running the step</h2>
+
+<p>Make sure Ollama is running with the model loaded:</p>
+
+<div class="roq-terminal roq-terminal-static">
+  <div class="roq-terminal-bar">
+    <span class="roq-terminal-dot red"></span>
+    <span class="roq-terminal-dot yellow"></span>
+    <span class="roq-terminal-dot green"></span>
+    <span class="roq-terminal-title">Terminal</span>
+    <button class="roq-copy-btn" title="Copy commands"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <div class="roq-terminal-body">
+    <span class="line"><span class="prompt">$</span> <span class="cmd">ollama</span> run granite4:7b-a1b-h</span>
+  </div>
+</div>
+
+<p>Then navigate to the variant you chose and run:</p>
 
 <div class="roq-terminal roq-terminal-animated" style="--term-delay: 0.3">
   <div class="roq-terminal-bar">
@@ -220,11 +156,160 @@ layout: :theme/page
   </div>
 </div>
 
-<p>Watch the logs to see each file being classified and routed. The LLM's classification drives Camel's routing decisions in real time.</p>
+<h2>Solution walkthrough</h2>
 
-<div class="markdown-alert markdown-alert-important">
-  <p class="markdown-alert-title">Important</p>
-  <p>Temperature is set to <code>0.0</code> for deterministic classification. A higher temperature would introduce randomness that could cause unpredictable routing.</p>
+<div class="markdown-alert markdown-alert-warning">
+  <p class="markdown-alert-title">Warning</p>
+  <p>The section below describes the solution. Try building the route yourself first using the Camel MCP tools and the Kaoto editor. Come back here once you're done or if you get stuck.</p>
 </div>
+
+<p>The route has three key parts:</p>
+
+<h3>1. Save the original body</h3>
+
+<p>In Camel, when you call <code>setBody</code> or send the body to an LLM, the message body is replaced with the new content. The original file content is gone. Use <code>setVariable</code> to store it before the classification so you can restore it later.</p>
+
+<pre><code class="language-yaml">- setVariable:
+    name: originalMessage
+    simple: "$\{body}"</code></pre>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>Camel's <a href="https://camel.apache.org/components/next/languages/simple-language.html" target="_blank">Simple language</a> is a lightweight scripting language designed for common use cases in Camel routes. It uses placeholders like <code>$\{body}</code> for the message body, <code>$\{headers.name}</code> for headers, and <code>$\{variable.name}</code> for variables.</p>
+</div>
+
+<h3>2. Classify</h3>
+
+<p>Embed the classification prompt directly in the body, asking the LLM to reply with just the category name. After the LLM call, the body contains the LLM response. Trim it and save it in a variable.</p>
+
+<pre><code class="language-yaml">- setBody:
+    simple: >
+      Classify the following customer message into exactly one category:
+      COMPLAINT, QUESTION, or PRAISE.
+      Reply with ONLY the category name, nothing else.
+
+      Message: $\{body}
+- to:
+    uri: langchain4j-agent:classifier
+- setVariable:
+    name: category
+    simple: "$\{body.trim()}"</code></pre>
+
+<h3>3. Restore and dispatch</h3>
+
+<p>Set the body back to the original message so the handlers receive the actual customer text, not the classification. Then use <code>choice</code> on the category variable.</p>
+
+<pre><code class="language-yaml">- setBody:
+    simple: "$\{variable.originalMessage}"
+- choice:
+    when:
+      - simple: "$\{variable.category} == 'COMPLAINT'"
+        steps:
+          - to:
+              uri: direct:handle-complaint
+      - simple: "$\{variable.category} == 'QUESTION'"
+        steps:
+          - to:
+              uri: direct:handle-question
+    otherwise:
+      steps:
+        - to:
+            uri: direct:handle-other</code></pre>
+
+<p>Use <code>temperature=0.0</code> for deterministic classification. A higher temperature would introduce randomness that could cause unpredictable routing.</p>
+
+<p>The full solution is in the <code>step-04/langchain4j/solution/</code> directory.</p>
+
+<h2>Going further: structured output with the OpenAI component</h2>
+
+<p>The OpenAI component supports a <code>jsonSchema</code> parameter that forces the LLM to return structured JSON instead of plain text. This is more robust than parsing a text response because the schema guarantees the structure.</p>
+
+<p>A <code>classify-schema.json</code> file is already provided in <code>step-04/openai/</code>. It defines a JSON schema with an enum of valid categories:</p>
+
+<pre><code class="language-json">{
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "The message category.",
+      "enum": ["COMPLAINT", "QUESTION", "PRAISE"]
+    }
+  },
+  "required": ["category"],
+  "additionalProperties": false
+}</code></pre>
+
+<p>Try building the same classification route for the OpenAI variant. The handler routes are already in <code>step-04/openai/route.camel.yaml</code>. Add a <code>classify-messages</code> route that uses this schema. Use the Camel MCP tools to look up the OpenAI component, the <code>jsonSchema</code> parameter, and the <code>jsonpath</code> language to extract the category from the JSON response.</p>
+
+<h3>Solution walkthrough</h3>
+
+<div class="markdown-alert markdown-alert-warning">
+  <p class="markdown-alert-title">Warning</p>
+  <p>Try building the route yourself first. Come back here once you're done or if you get stuck.</p>
+</div>
+
+<p>The classification route follows the same structure as the LangChain4j variant, with a few differences.</p>
+
+<h4>1. Classify with structured output</h4>
+
+<p>The OpenAI component uses the <code>CamelOpenAISystemMessage</code> header for the system prompt. The classification categories go in the system prompt, not in the JSON schema descriptions. Small local models like Ollama don't reliably read those. The <code>jsonSchema</code> parameter points to the schema file, and <code>temperature=0.0</code> keeps the output deterministic.</p>
+
+<pre><code class="language-yaml">- setHeader:
+    name: CamelOpenAISystemMessage
+    constant: >-
+      You are a message classifier. Classify the customer message
+      into exactly one category: COMPLAINT, QUESTION, or PRAISE.
+- setBody:
+    simple: "Classify this message:\n$\{body}"
+- to:
+    uri: openai:chat-completion
+    parameters:
+      jsonSchema: "resource:classpath:classify-schema.json"
+      temperature: 0.0</code></pre>
+
+<h4>2. Extract the category with jsonpath</h4>
+
+<p>The LLM returns JSON like <code>{"category": "COMPLAINT"}</code>. Use <code>jsonpath</code> to extract the category into a variable instead of <code>body.trim()</code>.</p>
+
+<pre><code class="language-yaml">- setVariable:
+    jsonpath:
+      expression: $.category
+    name: category</code></pre>
+
+<h4>3. Restore and dispatch</h4>
+
+<p>This part is the same as the LangChain4j variant. Restore the original message body and use <code>choice</code> on the category variable.</p>
+
+<pre><code class="language-yaml">- setBody:
+    simple: "$\{variable.originalMessage}"
+- choice:
+    when:
+      - simple: "$\{variable.category} == 'COMPLAINT'"
+        steps:
+          - to:
+              uri: direct:handle-complaint
+      - simple: "$\{variable.category} == 'QUESTION'"
+        steps:
+          - to:
+              uri: direct:handle-question
+    otherwise:
+      steps:
+        - to:
+            uri: direct:handle-other</code></pre>
+
+<p>The full solution is in <code>step-04/openai/solution/</code>.</p>
+
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">Note</p>
+  <p>Structured JSON output is also available in the <a href="https://camel.apache.org/components/next/langchain4j-agent-component.html#_structured_outputs_with_json_schema" target="_blank">LangChain4j Agent component</a>. Forage support for it is <a href="https://github.com/KaotoIO/forage/issues/315" target="_blank">coming soon</a>.</p>
+</div>
+
+<h2>Conclusion</h2>
+
+<p>You built a route where an LLM classifies incoming messages. Camel's Content-Based Router dispatches them to specialized handlers. This is the core pattern behind agentic workflows. One agent triages, others execute.</p>
+
+<p>You also learned how to preserve the message body across LLM calls using variables. And how the <code>direct</code> component connects routes together.</p>
+
+<p>In the next step, you'll split and aggregate data across multiple LLM calls.</p>
 
 </div>

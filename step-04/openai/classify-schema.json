@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "The message category.",
+      "enum": ["COMPLAINT", "QUESTION", "PRAISE"]
+    }
+  },
+  "required": ["category"],
+  "additionalProperties": false
+}

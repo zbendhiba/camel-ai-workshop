@@ -1,0 +1,72 @@
+- route:
+    id: classify-messages
+    from:
+      uri: file:../data
+      parameters:
+        noop: true
+      steps:
+        - setVariable:
+            name: originalMessage
+            simple: "${body}"
+        - setBody:
+            simple: >
+              Classify the following customer message into exactly one category:
+              COMPLAINT, QUESTION, or PRAISE.
+              Reply with ONLY the category name, nothing else.
+
+              Message: ${body}
+        - to:
+            uri: langchain4j-agent:classifier
+        - setVariable:
+            name: category
+            simple: "${body.trim()}"
+        - setBody:
+            simple: "${variable.originalMessage}"
+        - choice:
+            when:
+              - simple: "${variable.category} == 'COMPLAINT'"
+                steps:
+                  - to:
+                      uri: direct:handle-complaint
+              - simple: "${variable.category} == 'QUESTION'"
+                steps:
+                  - to:
+                      uri: direct:handle-question
+            otherwise:
+              steps:
+                - to:
+                    uri: direct:handle-other
+
+- route:
+    id: handle-complaint
+    from:
+      uri: direct:handle-complaint
+      steps:
+        - log:
+            message: "COMPLAINT detected — escalating: ${body}"
+
+- route:
+    id: handle-question
+    from:
+      uri: direct:handle-question
+      steps:
+        - log:
+            message: "QUESTION detected — generating answer for: ${body}"
+        - setBody:
+            simple: >
+              You are a helpful customer support agent. Answer the following
+              customer question concisely:
+
+              ${body}
+        - to:
+            uri: langchain4j-agent:classifier
+        - log:
+            message: "Generated answer: ${body}"
+
+- route:
+    id: handle-other
+    from:
+      uri: direct:handle-other
+      steps:
+        - log:
+            message: "OTHER/PRAISE — acknowledged: ${body}"

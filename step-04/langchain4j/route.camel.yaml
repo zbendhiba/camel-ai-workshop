@@ -1,56 +1,10 @@
-# <classify>
-- route:
-    id: classify-messages
-    from:
-      uri: file:../data
-      parameters:
-        noop: true
-      steps:
-        - log:
-            message: "Processing: ${headers.CamelFileName}"
-        - setHeader:
-            name: originalMessage
-            simple: "${body}"
-        - setBody:
-            simple: >
-              Classify the following customer message into exactly one category:
-              COMPLAINT, QUESTION, or PRAISE.
-              Reply with ONLY the category name, nothing else.
-
-              Message: ${headers.originalMessage}
-        - to:
-            uri: langchain4j-agent:classifier
-        - setHeader:
-            name: category
-            simple: "${body.trim()}"
-        - setBody:
-            simple: "${headers.originalMessage}"
-        - log:
-            message: "Category: ${headers.category} — File: ${headers.CamelFileName}"
-        - choice:
-            when:
-              - simple: "${headers.category} == 'COMPLAINT'"
-                steps:
-                  - to:
-                      uri: direct:handle-complaint
-              - simple: "${headers.category} == 'QUESTION'"
-                steps:
-                  - to:
-                      uri: direct:handle-question
-            otherwise:
-              steps:
-                - to:
-                    uri: direct:handle-other
-# </classify>
-
-# <handlers>
 - route:
     id: handle-complaint
     from:
       uri: direct:handle-complaint
       steps:
         - log:
-            message: "COMPLAINT detected — escalating: ${body}"
+            message: "COMPLAINT detected: ${body}"
 
 - route:
     id: handle-question
@@ -58,13 +12,9 @@
       uri: direct:handle-question
       steps:
         - log:
-            message: "QUESTION detected — generating answer for: ${body}"
+            message: "QUESTION detected: ${body}"
         - setBody:
-            simple: >
-              You are a helpful customer support agent. Answer the following
-              customer question concisely:
-
-              ${body}
+            simple: "Answer this customer question concisely: ${body}"
         - to:
             uri: langchain4j-agent:classifier
         - log:
@@ -76,5 +26,4 @@
       uri: direct:handle-other
       steps:
         - log:
-            message: "OTHER/PRAISE — acknowledged: ${body}"
-# </handlers>
+            message: "OTHER/PRAISE: ${body}"
