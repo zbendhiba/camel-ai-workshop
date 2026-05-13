@@ -5,15 +5,15 @@ layout: :theme/page
 
 <div class="content-prose dark:prose-invert">
 
-<p>In the previous step, you sent a single question to an LLM and logged the response. Now you'll embed an LLM call inside a Camel route to make routing decisions. The LLM classifies incoming messages. Camel routes each one to a different handler based on what the LLM decided.</p>
-
-<p>This is where Camel's integration patterns and LLMs start working together. A standalone LLM framework can classify text, but it can't route messages across systems. Camel can. The idea is simple: combine the LLM with the existing <code>choice</code> EIP. The LLM analyzes the message and produces a category. The <code>choice</code> uses that category to route. Each does what it's good at.</p>
+<p>In the previous step, you sent a single question to an LLM and logged the response. Now you'll embed an LLM call inside a Camel route to make routing decisions. The LLM classifies incoming messages. Camel routes each one to a different handler.</p>
 
 <h2>The Content-Based Router</h2>
 
 <p>The <a href="https://www.enterpriseintegrationpatterns.com/ContentBasedRouter.html" target="_blank">Content-Based Router</a> is a classic Enterprise Integration Pattern. It inspects each message and sends it to a different destination based on its content. In Camel, this is the <a href="https://camel.apache.org/components/next/eips/choice-eip.html" target="_blank"><code>choice</code> EIP</a>.</p>
 
-<p>Normally, the router checks a header or a field in the message body. Here, the routing decision is delegated to an LLM. The LLM reads customer messages and returns a category: COMPLAINT, QUESTION, or PRAISE. Camel's <code>choice</code> then routes each message to the right handler based on what the LLM decided.</p>
+<p>Normally, the router checks a header or a field in the message body. Here, the routing decision is delegated to an LLM. The LLM reads customer messages and returns a category: COMPLAINT, QUESTION, or PRAISE. Camel's <code>choice</code> then routes each message to the right handler.</p>
+
+<p>The idea is simple: combine the LLM with the existing <code>choice</code> EIP. The LLM analyzes the message and produces a category. The <code>choice</code> uses that category to route. Each does what it's good at. A standalone LLM framework can classify text, but it can't route messages across systems. Camel can.</p>
 
 <h2>The scenario</h2>
 
@@ -23,10 +23,18 @@ layout: :theme/page
 
 <p>You'll build this step in two parts. Start with the handler routes, already provided. Then create the triage agent route that reads files, classifies them via the LLM, and dispatches to those handlers.</p>
 
-<div style="background: #1e1e2e; border: 1px solid #404040; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 0.95rem; color: #cdd6f4; overflow-x: auto;">
-<span style="color: #f38ba8;">File</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">Triage Agent</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">COMPLAINT</span> <span style="color: #6c7086;">handler</span><br/>
-<span style="color: #1e1e2e;">File --&gt; Triage Agent --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">Question Agent</span><br/>
-<span style="color: #1e1e2e;">File --&gt; Triage Agent --&gt;</span> <span style="color: #a6e3a1;">Choice</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">OTHER</span> <span style="color: #6c7086;">handler</span>
+<div class="roq-flow-diagram" style="display: flex; align-items: center; gap: 0; margin: 1.5rem 0; overflow-x: auto; padding: 1rem 0;">
+  <div style="background: #f38ba8; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">File</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #f9e2af; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap; text-align: center;">Triage Agent<br/><span style="font-weight: 400; font-size: 0.7rem; opacity: 0.7;">LLM</span></div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #a6e3a1; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">Choice</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+    <div style="background: #cba6f7; color: #1e1e2e; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">COMPLAINT handler</div>
+    <div style="background: #f9e2af; color: #1e1e2e; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; white-space: nowrap; text-align: center;">Question Agent <span style="font-weight: 400; font-size: 0.65rem; opacity: 0.7;">LLM</span></div>
+    <div style="background: #cba6f7; color: #1e1e2e; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">OTHER handler</div>
+  </div>
 </div>
 
 <h3>Part 1: The handler routes</h3>
@@ -226,6 +234,19 @@ layout: :theme/page
 
 <p>The full solution is in the <code>step-04/langchain4j/solution/</code> directory.</p>
 
+<h2>Conclusion</h2>
+
+<p>You built a triage agent that classifies incoming messages via an LLM. Camel's Content-Based Router dispatches them to specialized handlers and agents. This is the core pattern behind agentic workflows. One agent triages, others execute.</p>
+
+<div class="markdown-alert markdown-alert-important">
+  <p class="markdown-alert-title">Important</p>
+  <p>Look at the diagram again. The <code>choice</code> EIP dispatches to both LLM-powered agents and simple log handlers in the same route. This is where Camel stands out. Agentic frameworks focus on agents talking to agents. Camel lets you mix agents with any integration step: a database write, an API call, a file drop, a message queue. Not everything needs an LLM. The <code>choice</code> EIP doesn't care what's behind each branch.</p>
+</div>
+
+<p>You also learned how to preserve the message body across LLM calls using variables. And how the <code>direct</code> component connects routes together.</p>
+
+<p>In the next step, you'll split and aggregate data across multiple LLM calls.</p>
+
 <h2>Going further: structured output with the OpenAI component</h2>
 
 <p>The OpenAI component supports a <code>jsonSchema</code> parameter that forces the LLM to return structured JSON instead of plain text. This is more robust than parsing a text response because the schema guarantees the structure.</p>
@@ -310,12 +331,5 @@ layout: :theme/page
   <p>Structured JSON output is also available in the <a href="https://camel.apache.org/components/next/langchain4j-agent-component.html#_structured_outputs_with_json_schema" target="_blank">LangChain4j Agent component</a>. Forage support for it is <a href="https://github.com/KaotoIO/forage/issues/315" target="_blank">coming soon</a>.</p>
 </div>
 
-<h2>Conclusion</h2>
-
-<p>You built a triage agent that classifies incoming messages via an LLM. Camel's Content-Based Router dispatches them to specialized handlers and agents. This is the core pattern behind agentic workflows. One agent triages, others execute.</p>
-
-<p>You also learned how to preserve the message body across LLM calls using variables. And how the <code>direct</code> component connects routes together.</p>
-
-<p>In the next step, you'll split and aggregate data across multiple LLM calls.</p>
 
 </div>

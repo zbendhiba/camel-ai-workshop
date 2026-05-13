@@ -17,8 +17,14 @@ layout: :theme/page
 
 <p>The route you're about to build is simple. A timer fires once, sets a question as the message body, sends it to an LLM, and logs the response. Here's the flow:</p>
 
-<div style="background: #1e1e2e; border: 1px solid #404040; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 0.95rem; color: #cdd6f4; overflow-x: auto;">
-<span style="color: #f38ba8;">Timer</span> <span style="color: #6c7086;">(fire once)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #a6e3a1;">SetBody</span> <span style="color: #6c7086;">(prompt)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #f9e2af;">LLM</span> <span style="color: #6c7086;">(call)</span> <span style="color: #89b4fa;">--&gt;</span> <span style="color: #cba6f7;">Log</span> <span style="color: #6c7086;">(response)</span>
+<div class="roq-flow-diagram" style="display: flex; align-items: center; gap: 0; margin: 1.5rem 0; overflow-x: auto; padding: 1rem 0;">
+  <div style="background: #f38ba8; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">Timer</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #a6e3a1; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">SetBody</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #f9e2af; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap; text-align: center;">LLM<br/><span style="font-weight: 400; font-size: 0.7rem; opacity: 0.7;">call</span></div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #cba6f7; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">Log</div>
 </div>
 
 <p>From the workshop root directory, ask your AI assistant to generate the route. Pick the tab matching the approach you chose:</p>

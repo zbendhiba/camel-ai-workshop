@@ -66,6 +66,23 @@ Quarkus Roq uses the Qute templating engine, which interprets `${...}` as templa
 
 Write documentation as natural, flowing prose. Avoid bullet-point-heavy formats. Use descriptive section titles, not "Part 1" / "Part 2". Prefer paragraph form when explaining concepts.
 
+### Flow Diagrams
+
+Use CSS flexbox diagrams with colored pill-shaped boxes and arrow connectors. LLM-powered nodes use yellow (`#f9e2af`), simple handlers use purple (`#cba6f7`), input sources use red/pink (`#f38ba8`), EIP nodes use green (`#a6e3a1`), arrows use blue (`#89b4fa`). When a node fans out to multiple destinations, stack them vertically in a flex column. Example:
+
+```html
+<div class="roq-flow-diagram" style="display: flex; align-items: center; gap: 0; margin: 1.5rem 0; overflow-x: auto; padding: 1rem 0;">
+  <div style="background: #f38ba8; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">Source</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="background: #f9e2af; color: #1e1e2e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; white-space: nowrap;">LLM Agent</div>
+  <div style="color: #89b4fa; font-size: 1.2rem; padding: 0 0.4rem;">&#x2192;</div>
+  <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+    <div style="background: #cba6f7; color: #1e1e2e; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">Handler A</div>
+    <div style="background: #cba6f7; color: #1e1e2e; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">Handler B</div>
+  </div>
+</div>
+```
+
 ## Forage Configuration Pattern
 
 Agents are configured via `forage-agent-factory.properties`:
